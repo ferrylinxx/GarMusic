@@ -1,0 +1,210 @@
+.playlist-page {
+    padding-top: calc(var(--navbar-height) + 22px);
+    padding-bottom: calc(var(--player-height) + 26px);
+}
+
+.playlist-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+}
+
+.playlist-hero {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: 18px;
+    padding: 18px;
+    border-radius: var(--radius-xl);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.playlist-cover {
+    width: 200px;
+    height: 200px;
+    border-radius: 14px;
+    object-fit: cover;
+}
+
+.playlist-cover.fallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 200px;
+    height: 200px;
+    border-radius: 14px;
+    background: rgba(102, 126, 234, 0.3);
+    font-size: 2.4rem;
+    font-weight: 800;
+}
+
+.playlist-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.playlist-type {
+    font-size: 0.8rem;
+    color: var(--color-accent-primary);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.playlist-copy h1 {
+    font-size: clamp(1.8rem, 4vw, 2.9rem);
+    line-height: 1.04;
+}
+
+.playlist-copy p {
+    color: var(--color-text-secondary);
+    max-width: 760px;
+}
+
+.playlist-meta {
+    display: inline-flex;
+    gap: 8px;
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+}
+
+.playlist-meta span + span::before {
+    content: '•';
+    margin-right: 8px;
+}
+
+.playlist-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+}
+
+.playlist-share-message {
+    color: #86efac;
+    font-size: 0.84rem;
+    font-weight: 600;
+}
+
+.playlist-tracks {
+    margin-top: 14px;
+    border-radius: var(--radius-xl);
+    padding: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.playlist-track-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.playlist-track-row + .playlist-track-row {
+    margin-top: 8px;
+}
+
+.playlist-track-main {
+    border: none;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    display: grid;
+    grid-template-columns: 26px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.playlist-track-index {
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+}
+
+.playlist-track-copy {
+    min-width: 0;
+}
+
+.playlist-track-copy strong,
+.playlist-track-copy small {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.playlist-track-copy small {
+    color: var(--color-text-muted);
+    font-size: 0.78rem;
+}
+
+.playlist-track-duration {
+    color: var(--color-text-muted);
+    font-size: 0.8rem;
+}
+
+.playlist-track-actions {
+    display: inline-flex;
+    gap: 8px;
+}
+
+.track-mini-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+}
+
+.track-mini-btn.is-favorite {
+    color: #fb7185;
+    border-color: rgba(251, 113, 133, 0.6);
+}
+
+.playlist-empty {
+    padding: 12px;
+    color: var(--color-text-muted);
+}
+
+.playlist-not-found {
+    max-width: 520px;
+    margin: 14vh auto 0;
+    text-align: center;
+    border-radius: var(--radius-xl);
+    padding: 20px;
+}
+
+@media (max-width: 900px) {
+    .playlist-page {
+        padding-top: calc(var(--navbar-height-mobile) + 14px);
+        padding-bottom: calc(var(--player-height-mobile) + 16px);
+    }
+
+    .playlist-hero {
+        grid-template-columns: 1fr;
+        padding: 14px;
+    }
+
+    .playlist-cover,
+    .playlist-cover.fallback {
+        width: min(260px, 100%);
+        height: auto;
+        aspect-ratio: 1 / 1;
+    }
+
+    .playlist-track-main {
+        grid-template-columns: 22px minmax(0, 1fr) auto;
+    }
+}
+

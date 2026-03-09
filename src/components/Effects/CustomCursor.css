@@ -1,0 +1,90 @@
+.custom-cursor-liquid {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 28px;
+    height: 38px;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate3d(-100px, -100px, 0);
+    clip-path: polygon(8% 2%, 94% 58%, 58% 63%, 76% 100%, 54% 100%, 37% 68%, 8% 84%);
+    background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.82) 0%, rgba(255, 255, 255, 0.28) 26%, rgba(255, 255, 255, 0.06) 58%, rgba(102, 126, 234, 0.35) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.52);
+    box-shadow:
+        0 12px 26px rgba(0, 0, 0, 0.38),
+        inset 0 1px 1px rgba(255, 255, 255, 0.7),
+        inset 0 -4px 10px rgba(102, 126, 234, 0.35);
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    transition: transform 160ms ease, filter 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+}
+
+.custom-cursor-liquid::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 7px;
+    width: 11px;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.78);
+    opacity: 0.92;
+}
+
+.custom-cursor-liquid.hovering {
+    filter: drop-shadow(0 0 8px rgba(245, 87, 108, 0.5));
+    box-shadow:
+        0 16px 34px rgba(245, 87, 108, 0.3),
+        inset 0 1px 1px rgba(255, 255, 255, 0.8),
+        inset 0 -4px 10px rgba(245, 87, 108, 0.32);
+}
+
+.custom-cursor-liquid.clicking {
+    opacity: 0.9;
+}
+
+.custom-cursor-core {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 10000;
+    transform: translate3d(-100px, -100px, 0);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(102, 126, 234, 0.92));
+    box-shadow: 0 0 18px rgba(102, 126, 234, 0.72);
+    transition: transform 140ms ease, opacity 140ms ease, box-shadow 140ms ease;
+}
+
+.custom-cursor-core.hovering {
+    box-shadow: 0 0 20px rgba(245, 87, 108, 0.74);
+}
+
+.custom-cursor-core.clicking {
+    opacity: 0.82;
+}
+
+@media (max-width: 768px),
+(hover: none) {
+    .custom-cursor-liquid,
+    .custom-cursor-core {
+        display: none;
+    }
+}
+
+@media (hover: hover) {
+    body,
+    a,
+    button,
+    input,
+    textarea,
+    select,
+    summary,
+    [role='button'],
+    .clickable {
+        cursor: none !important;
+    }
+}

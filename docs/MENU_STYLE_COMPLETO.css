@@ -1,0 +1,1575 @@
+﻿/* Performance optimizations for mobile - MEJORADO */
+@media (max-width: 768px) {
+  /* Reduce blur intensity on mobile for better performance */
+  .glass,
+  .glass-dark,
+  .glass-card,
+  .glass-card-enhanced {
+    backdrop-filter: blur(8px) saturate(120%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(120%) !important;
+  }
+
+  .glass-nav {
+    backdrop-filter: blur(8px) saturate(120%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(120%) !important;
+  }
+
+  /* Simplify animations on mobile */
+  .animate-float {
+    animation-duration: 8s !important;
+    will-change: transform;
+  }
+
+  /* Reduce shadow complexity on mobile */
+  .glass-card,
+  .glass-card-enhanced {
+    box-shadow:
+      0 4px 16px 0 rgba(31, 38, 135, 0.1),
+      inset 0 1px 2px 0 rgba(255, 255, 255, 0.6) !important;
+  }
+
+  /* ELIMINAR TODAS las capas decorativas en mÃ³vil para mejor rendimiento */
+  .glass-nav-shine,
+  .glass-nav-blur-mask,
+  .glass-nav-particles,
+  .glass-nav-caustics,
+  .glass-nav-spectrum {
+    display: none !important;
+  }
+
+  /* Disable expensive animations on mobile */
+  @media (prefers-reduced-motion: no-preference) {
+    .glass-nav-shine {
+      animation: none !important;
+    }
+  }
+}
+
+.glass-nav {
+  background:
+    /* Iridiscencia hologrÃ¡fica - mÃºltiples capas */
+    linear-gradient(
+      125deg,
+      rgba(147, 197, 253, 0.18) 0%,
+      rgba(196, 181, 253, 0.15) 15%,
+      rgba(251, 207, 232, 0.12) 30%,
+      rgba(165, 243, 252, 0.15) 45%,
+      rgba(134, 239, 172, 0.12) 60%,
+      rgba(253, 224, 71, 0.1) 75%,
+      rgba(251, 146, 60, 0.12) 90%,
+      rgba(147, 197, 253, 0.18) 100%
+    ),
+    /* Capa de brillo perlado */
+    radial-gradient(
+      ellipse 150% 100% at 50% 0%,
+      rgba(255, 255, 255, 0.25) 0%,
+      rgba(255, 255, 255, 0.12) 30%,
+      transparent 60%
+    ),
+    /* Capa de profundidad */
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.15) 0%,
+      rgba(255, 255, 255, 0.05) 50%,
+      rgba(0, 0, 0, 0.03) 100%
+    ),
+    /* Gradiente base ultra-transparente */
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.06) 0%,
+      rgba(255, 255, 255, 0.02) 50%,
+      rgba(255, 255, 255, 0.06) 100%
+    );
+  background-size: 300% 300%, 100% 100%, 100% 100%, 100% 100%;
+  animation:
+    iridescence-holographic 20s ease-in-out infinite,
+    float-gentle 8s ease-in-out infinite;
+
+  /* DistorsiÃ³n extrema del fondo - cristal lÃ­quido avanzado */
+  backdrop-filter:
+    blur(32px)
+    saturate(280%)
+    brightness(1.25)
+    contrast(1.2)
+    hue-rotate(8deg)
+    opacity(0.95);
+  -webkit-backdrop-filter:
+    blur(32px)
+    saturate(280%)
+    brightness(1.25)
+    contrast(1.2)
+    hue-rotate(8deg)
+    opacity(0.95);
+
+  border: none;
+  position: relative;
+  overflow: hidden;
+
+  /* Sombras 3D ultra-realistas */
+  box-shadow:
+    /* Sombras exteriores - profundidad atmosfÃ©rica */
+    0 20px 60px 0 rgba(0, 0, 0, 0.15),
+    0 12px 40px 0 rgba(0, 0, 0, 0.12),
+    0 6px 24px 0 rgba(0, 0, 0, 0.1),
+    0 2px 8px 0 rgba(0, 0, 0, 0.06),
+    /* Halo de luz exterior */
+    0 0 40px 0 rgba(147, 197, 253, 0.15),
+    0 0 20px 0 rgba(196, 181, 253, 0.1),
+    /* Borde superior - reflejo 3D ULTRA pronunciado */
+    inset 0 4px 8px 0 rgba(255, 255, 255, 1),
+    inset 0 3px 6px 0 rgba(255, 255, 255, 1),
+    inset 0 2px 4px 0 rgba(255, 255, 255, 0.95),
+    inset 0 1px 2px 0 rgba(255, 255, 255, 0.9),
+    /* Borde inferior - profundidad 3D extrema */
+    inset 0 -4px 8px 0 rgba(0, 0, 0, 0.3),
+    inset 0 -3px 6px 0 rgba(0, 0, 0, 0.25),
+    inset 0 -2px 4px 0 rgba(0, 0, 0, 0.2),
+    inset 0 -1px 2px 0 rgba(0, 0, 0, 0.15),
+    /* Bordes laterales - efecto 3D ULTRA pronunciado */
+    inset 4px 0 8px 0 rgba(255, 255, 255, 1),
+    inset -4px 0 8px 0 rgba(255, 255, 255, 1),
+    inset 3px 0 6px 0 rgba(255, 255, 255, 0.95),
+    inset -3px 0 6px 0 rgba(255, 255, 255, 0.95),
+    inset 2px 0 4px 0 rgba(255, 255, 255, 1),
+    inset -2px 0 4px 0 rgba(255, 255, 255, 1);
+
+  /* TransformaciÃ³n 3D sutil */
+  transform: translateZ(0);
+  will-change: transform, backdrop-filter;
+}
+
+/* AnimaciÃ³n de iridiscencia hologrÃ¡fica */
+@keyframes iridescence-holographic {
+  0% {
+    background-position: 0% 0%, 50% 50%, 0% 0%, 0% 0%;
+    filter: hue-rotate(0deg);
+  }
+  25% {
+    background-position: 50% 50%, 50% 50%, 0% 0%, 0% 0%;
+    filter: hue-rotate(5deg);
+  }
+  50% {
+    background-position: 100% 100%, 50% 50%, 0% 0%, 0% 0%;
+    filter: hue-rotate(10deg);
+  }
+  75% {
+    background-position: 50% 50%, 50% 50%, 0% 0%, 0% 0%;
+    filter: hue-rotate(5deg);
+  }
+  100% {
+    background-position: 0% 0%, 50% 50%, 0% 0%, 0% 0%;
+    filter: hue-rotate(0deg);
+  }
+}
+
+/* AnimaciÃ³n de flotaciÃ³n suave */
+@keyframes float-gentle {
+  0%, 100% {
+    transform: translateY(0px) translateZ(0);
+  }
+  50% {
+    transform: translateY(-2px) translateZ(0);
+  }
+}
+
+/* RefracciÃ³n de luz ultra-realista - capa superior */
+.glass-nav::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70%;
+  background:
+    /* Brillo hologrÃ¡fico central */
+    radial-gradient(
+      ellipse 90% 70% at 50% 0%,
+      rgba(255, 255, 255, 0.85) 0%,
+      rgba(255, 255, 255, 0.6) 20%,
+      rgba(255, 255, 255, 0.35) 40%,
+      rgba(255, 255, 255, 0.15) 60%,
+      rgba(255, 255, 255, 0) 80%
+    ),
+    /* Reflejos laterales */
+    radial-gradient(
+      ellipse 40% 80% at 15% 30%,
+      rgba(147, 197, 253, 0.4) 0%,
+      rgba(147, 197, 253, 0.2) 40%,
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 40% 80% at 85% 30%,
+      rgba(196, 181, 253, 0.4) 0%,
+      rgba(196, 181, 253, 0.2) 40%,
+      transparent 70%
+    ),
+    /* Gradiente principal mejorado */
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.75) 0%,
+      rgba(255, 255, 255, 0.55) 15%,
+      rgba(255, 255, 255, 0.35) 30%,
+      rgba(255, 255, 255, 0.2) 50%,
+      rgba(255, 255, 255, 0.08) 70%,
+      rgba(255, 255, 255, 0) 100%
+    );
+  border-radius: 1.5rem 1.5rem 0 0;
+  pointer-events: none;
+  z-index: 1;
+  filter: blur(1px);
+  animation: shimmer-light 10s ease-in-out infinite;
+}
+
+/* AnimaciÃ³n de brillo parpadeante */
+@keyframes shimmer-light {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+/* Efecto de ondulaciÃ³n lÃ­quida avanzada */
+.glass-nav::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    /* Ondas mÃºltiples con colores iridiscentes */
+    radial-gradient(
+      ellipse 120% 100% at 15% 40%,
+      rgba(147, 197, 253, 0.25) 0%,
+      rgba(147, 197, 253, 0.12) 30%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 120% 100% at 85% 60%,
+      rgba(196, 181, 253, 0.22) 0%,
+      rgba(196, 181, 253, 0.1) 30%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 100% 120% at 50% 80%,
+      rgba(165, 243, 252, 0.2) 0%,
+      rgba(165, 243, 252, 0.08) 30%,
+      transparent 60%
+    ),
+    /* Ondas secundarias */
+    radial-gradient(
+      ellipse 80% 90% at 35% 20%,
+      rgba(251, 207, 232, 0.18) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse 80% 90% at 65% 75%,
+      rgba(134, 239, 172, 0.15) 0%,
+      transparent 50%
+    ),
+    /* Gradiente diagonal mejorado */
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.18) 0%,
+      rgba(255, 255, 255, 0.08) 25%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.08) 75%,
+      rgba(255, 255, 255, 0.15) 100%
+    );
+  background-size:
+    250% 250%,
+    250% 250%,
+    250% 250%,
+    200% 200%,
+    200% 200%,
+    100% 100%;
+  animation:
+    ripple-complex 12s ease-in-out infinite,
+    ripple-secondary 8s ease-in-out infinite reverse;
+  border-radius: 1.5rem;
+  pointer-events: none;
+  z-index: 1;
+  mix-blend-mode: screen;
+  opacity: 0.9;
+}
+
+/* AnimaciÃ³n de ondulaciÃ³n compleja */
+@keyframes ripple-complex {
+  0%, 100% {
+    background-position:
+      0% 50%,
+      100% 50%,
+      50% 100%,
+      20% 30%,
+      80% 70%,
+      0% 0%;
+  }
+  33% {
+    background-position:
+      50% 30%,
+      50% 70%,
+      30% 50%,
+      40% 50%,
+      60% 50%,
+      0% 0%;
+  }
+  66% {
+    background-position:
+      100% 50%,
+      0% 50%,
+      70% 30%,
+      60% 70%,
+      40% 30%,
+      0% 0%;
+  }
+}
+
+/* AnimaciÃ³n secundaria */
+@keyframes ripple-secondary {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.02) rotate(2deg);
+    opacity: 0.7;
+  }
+}
+
+
+
+/* AnimaciÃ³n de brillo de gotas */
+@keyframes droplet-shimmer {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.05);
+  }
+}
+
+/* TensiÃ³n superficial avanzada en bordes */
+.glass-nav-shine::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 1.5rem;
+  background:
+    /* Esquinas superiores - brillo intenso */
+    radial-gradient(
+      ellipse 35% 40% at 0% 0%,
+      rgba(255, 255, 255, 0.6) 0%,
+      rgba(255, 255, 255, 0.35) 20%,
+      rgba(147, 197, 253, 0.15) 40%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 35% 40% at 100% 0%,
+      rgba(255, 255, 255, 0.6) 0%,
+      rgba(255, 255, 255, 0.35) 20%,
+      rgba(196, 181, 253, 0.15) 40%,
+      transparent 60%
+    ),
+    /* Esquinas inferiores - sombra y brillo */
+    radial-gradient(
+      ellipse 35% 40% at 0% 100%,
+      rgba(255, 255, 255, 0.45) 0%,
+      rgba(255, 255, 255, 0.25) 20%,
+      rgba(165, 243, 252, 0.12) 40%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 35% 40% at 100% 100%,
+      rgba(255, 255, 255, 0.45) 0%,
+      rgba(255, 255, 255, 0.25) 20%,
+      rgba(251, 207, 232, 0.12) 40%,
+      transparent 60%
+    ),
+    /* Bordes laterales - menisco lÃ­quido */
+    radial-gradient(
+      ellipse 15% 60% at 0% 50%,
+      rgba(255, 255, 255, 0.35) 0%,
+      rgba(255, 255, 255, 0.15) 40%,
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 15% 60% at 100% 50%,
+      rgba(255, 255, 255, 0.35) 0%,
+      rgba(255, 255, 255, 0.15) 40%,
+      transparent 70%
+    ),
+    /* Bordes superior e inferior */
+    radial-gradient(
+      ellipse 60% 15% at 50% 0%,
+      rgba(255, 255, 255, 0.4) 0%,
+      rgba(255, 255, 255, 0.2) 40%,
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 60% 15% at 50% 100%,
+      rgba(255, 255, 255, 0.3) 0%,
+      rgba(255, 255, 255, 0.15) 40%,
+      transparent 70%
+    );
+  pointer-events: none;
+  animation: surface-tension-pulse 8s ease-in-out infinite;
+}
+
+/* AnimaciÃ³n de pulsaciÃ³n de tensiÃ³n superficial */
+@keyframes surface-tension-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Blur variable ultra-avanzado - distorsiÃ³n lÃ­quida compleja */
+.glass-nav-blur-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 1.5rem;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+
+  background:
+    /* Ondas de distorsiÃ³n primarias con colores */
+    radial-gradient(
+      ellipse 70% 90% at 25% 35%,
+      rgba(147, 197, 253, 0.22) 0%,
+      rgba(147, 197, 253, 0.12) 30%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 70% 90% at 75% 65%,
+      rgba(196, 181, 253, 0.2) 0%,
+      rgba(196, 181, 253, 0.1) 30%,
+      transparent 60%
+    ),
+    /* Ondas secundarias */
+    radial-gradient(
+      ellipse 50% 70% at 50% 20%,
+      rgba(165, 243, 252, 0.18) 0%,
+      rgba(165, 243, 252, 0.08) 30%,
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse 50% 70% at 50% 80%,
+      rgba(251, 207, 232, 0.16) 0%,
+      rgba(251, 207, 232, 0.07) 30%,
+      transparent 55%
+    ),
+    /* Ondas terciarias - micro distorsiones */
+    radial-gradient(
+      ellipse 40% 50% at 15% 60%,
+      rgba(134, 239, 172, 0.15) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse 40% 50% at 85% 40%,
+      rgba(253, 224, 71, 0.12) 0%,
+      transparent 50%
+    ),
+    /* Gradiente base para curvatura del cristal */
+    radial-gradient(
+      ellipse 110% 110% at 50% 50%,
+      rgba(255, 255, 255, 0.08) 0%,
+      rgba(255, 255, 255, 0.14) 35%,
+      rgba(255, 255, 255, 0.2) 65%,
+      rgba(255, 255, 255, 0.25) 100%
+    );
+
+  background-size:
+    200% 200%,
+    200% 200%,
+    180% 180%,
+    180% 180%,
+    150% 150%,
+    150% 150%,
+    100% 100%;
+
+  /* Simula refracciÃ³n extrema y distorsiÃ³n */
+  filter: blur(4px) saturate(150%);
+  mix-blend-mode: soft-light;
+  opacity: 0.85;
+
+  animation: distortion-wave 14s ease-in-out infinite;
+}
+
+/* AnimaciÃ³n de ondas de distorsiÃ³n */
+@keyframes distortion-wave {
+  0%, 100% {
+    background-position:
+      0% 50%,
+      100% 50%,
+      50% 0%,
+      50% 100%,
+      20% 60%,
+      80% 40%,
+      50% 50%;
+  }
+  33% {
+    background-position:
+      50% 30%,
+      50% 70%,
+      70% 50%,
+      30% 50%,
+      40% 40%,
+      60% 60%,
+      50% 50%;
+  }
+  66% {
+    background-position:
+      100% 50%,
+      0% 50%,
+      30% 100%,
+      70% 0%,
+      60% 20%,
+      40% 80%,
+      50% 50%;
+  }
+}
+
+/* PartÃ­culas flotantes en el cristal lÃ­quido */
+.glass-nav-particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 1.5rem;
+  pointer-events: none;
+  z-index: 3;
+  overflow: hidden;
+
+  background-image:
+    /* PartÃ­culas grandes */
+    radial-gradient(circle, rgba(255, 255, 255, 0.6) 1px, transparent 1px),
+    radial-gradient(circle, rgba(147, 197, 253, 0.5) 1.5px, transparent 1.5px),
+    radial-gradient(circle, rgba(196, 181, 253, 0.5) 1.5px, transparent 1.5px),
+    /* PartÃ­culas medianas */
+    radial-gradient(circle, rgba(255, 255, 255, 0.4) 0.8px, transparent 0.8px),
+    radial-gradient(circle, rgba(165, 243, 252, 0.4) 1px, transparent 1px),
+    radial-gradient(circle, rgba(251, 207, 232, 0.4) 1px, transparent 1px),
+    /* PartÃ­culas pequeÃ±as */
+    radial-gradient(circle, rgba(255, 255, 255, 0.3) 0.5px, transparent 0.5px),
+    radial-gradient(circle, rgba(134, 239, 172, 0.3) 0.6px, transparent 0.6px);
+
+  background-size:
+    200px 200px,
+    250px 250px,
+    220px 220px,
+    150px 150px,
+    180px 180px,
+    160px 160px,
+    100px 100px,
+    120px 120px;
+
+  background-position:
+    0% 0%,
+    30% 20%,
+    70% 40%,
+    20% 60%,
+    80% 70%,
+    50% 30%,
+    10% 80%,
+    90% 50%;
+
+  animation: particles-float 25s linear infinite;
+  opacity: 0.6;
+  mix-blend-mode: screen;
+}
+
+/* AnimaciÃ³n de partÃ­culas flotantes */
+@keyframes particles-float {
+  0% {
+    transform: translateY(0) translateX(0);
+  }
+  100% {
+    transform: translateY(-100px) translateX(50px);
+  }
+}
+
+/* CÃ¡usticas - patrones de luz refractada */
+.glass-nav-caustics {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 1.5rem;
+  pointer-events: none;
+  z-index: 2;
+  overflow: hidden;
+
+  background:
+    /* Patrones de cÃ¡usticas */
+    radial-gradient(
+      ellipse 40% 60% at 20% 30%,
+      rgba(255, 255, 255, 0.3) 0%,
+      rgba(147, 197, 253, 0.15) 20%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse 50% 70% at 80% 60%,
+      rgba(255, 255, 255, 0.25) 0%,
+      rgba(196, 181, 253, 0.12) 20%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse 35% 50% at 50% 80%,
+      rgba(255, 255, 255, 0.2) 0%,
+      rgba(165, 243, 252, 0.1) 20%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse 45% 55% at 30% 70%,
+      rgba(251, 207, 232, 0.18) 0%,
+      transparent 45%
+    ),
+    radial-gradient(
+      ellipse 40% 50% at 70% 25%,
+      rgba(134, 239, 172, 0.15) 0%,
+      transparent 45%
+    );
+
+  background-size:
+    300% 300%,
+    350% 350%,
+    280% 280%,
+    250% 250%,
+    270% 270%;
+
+  animation: caustics-shimmer 18s ease-in-out infinite;
+  mix-blend-mode: overlay;
+  opacity: 0.7;
+  filter: blur(2px);
+}
+
+/* AnimaciÃ³n de cÃ¡usticas */
+@keyframes caustics-shimmer {
+  0%, 100% {
+    background-position:
+      0% 0%,
+      100% 100%,
+      50% 50%,
+      25% 75%,
+      75% 25%;
+    opacity: 0.7;
+  }
+  25% {
+    background-position:
+      25% 25%,
+      75% 75%,
+      60% 40%,
+      40% 60%,
+      80% 20%;
+    opacity: 0.85;
+  }
+  50% {
+    background-position:
+      50% 50%,
+      50% 50%,
+      70% 30%,
+      30% 70%,
+      60% 40%;
+    opacity: 0.6;
+  }
+  75% {
+    background-position:
+      75% 75%,
+      25% 25%,
+      40% 60%,
+      60% 40%,
+      20% 80%;
+    opacity: 0.8;
+  }
+}
+
+/* Espectro de luz - dispersiÃ³n prismÃ¡tica */
+.glass-nav-spectrum {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 300%;
+  height: 100%;
+  border-radius: 1.5rem;
+  pointer-events: none;
+  z-index: 4;
+
+  background: linear-gradient(
+    110deg,
+    transparent 0%,
+    transparent 35%,
+    /* Espectro visible completo */
+    rgba(255, 0, 0, 0.08) 38%,      /* Rojo */
+    rgba(255, 127, 0, 0.08) 40%,    /* Naranja */
+    rgba(255, 255, 0, 0.08) 42%,    /* Amarillo */
+    rgba(0, 255, 0, 0.08) 44%,      /* Verde */
+    rgba(0, 255, 255, 0.08) 46%,    /* Cyan */
+    rgba(0, 0, 255, 0.08) 48%,      /* Azul */
+    rgba(139, 0, 255, 0.08) 50%,    /* Violeta */
+    rgba(255, 255, 255, 0.15) 52%,  /* Blanco brillante */
+    rgba(139, 0, 255, 0.08) 54%,    /* Violeta */
+    rgba(0, 0, 255, 0.08) 56%,      /* Azul */
+    rgba(0, 255, 255, 0.08) 58%,    /* Cyan */
+    rgba(0, 255, 0, 0.08) 60%,      /* Verde */
+    rgba(255, 255, 0, 0.08) 62%,    /* Amarillo */
+    rgba(255, 127, 0, 0.08) 64%,    /* Naranja */
+    rgba(255, 0, 0, 0.08) 66%,      /* Rojo */
+    transparent 68%,
+    transparent 100%
+  );
+
+  animation: spectrum-sweep 16s linear infinite;
+  mix-blend-mode: screen;
+  opacity: 0.6;
+  filter: blur(1.5px);
+}
+
+/* AnimaciÃ³n de barrido espectral */
+@keyframes spectrum-sweep {
+  0% {
+    transform: translateX(0%) rotate(-8deg);
+  }
+  100% {
+    transform: translateX(33.33%) rotate(-8deg);
+  }
+}
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes glass-shine {
+  0% {
+    transform: translateX(-100%) rotate(45deg);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateX(200%) rotate(45deg);
+    opacity: 0;
+  }
+}
+
+/* Links del menÃº con estilo liquid glass - ULTRA MEJORADO */
+.nav-link {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  position: relative;
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  overflow: hidden;
+
+  /* Efecto liquid glass mejorado */
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0.2) 100%
+  );
+  backdrop-filter: blur(12px) saturate(170%);
+  -webkit-backdrop-filter: blur(12px) saturate(170%);
+
+  border-radius: 1.25rem;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+
+  /* Texto sÃ³lido con sombra para mejor legibilidad */
+  color: #0f172a;
+  text-shadow:
+    0 1px 2px rgba(255, 255, 255, 0.8),
+    0 0 20px rgba(255, 255, 255, 0.5);
+
+  /* Sombras mejoradas */
+  box-shadow:
+    inset 0 2px 4px rgba(255, 255, 255, 0.5),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.08),
+    0 4px 12px rgba(0, 0, 0, 0.1),
+    0 0 0 0 rgba(59, 130, 246, 0);
+
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+}
+
+/* Efecto de brillo que se mueve al hacer hover */
+.nav-link::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -100%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.6) 0%,
+    rgba(147, 197, 253, 0.3) 30%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Efecto de partÃ­culas */
+.nav-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 50%, rgba(139, 92, 246, 0.15) 0%, transparent 50%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: inherit;
+}
+
+.nav-link:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0.35) 100%
+  );
+
+  border-color: rgba(255, 255, 255, 0.6);
+  color: #020617;
+
+  box-shadow:
+    inset 0 2px 6px rgba(255, 255, 255, 0.7),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.1),
+    0 8px 32px rgba(59, 130, 246, 0.3),
+    0 0 60px rgba(59, 130, 246, 0.2),
+    0 0 0 4px rgba(59, 130, 246, 0.15);
+
+  transform: translateY(-4px) scale(1.05);
+}
+
+.nav-link:hover::before {
+  opacity: 1;
+  left: 100%;
+}
+
+.nav-link:hover::after {
+  opacity: 1;
+}
+
+/* Efecto de presiÃ³n al hacer clic */
+.nav-link:active {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow:
+    inset 0 2px 4px rgba(255, 255, 255, 0.5),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.15),
+    0 4px 16px rgba(59, 130, 246, 0.25);
+}
+
+/* AnimaciÃ³n de gradiente */
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.glass-nav-shine {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: glass-shine 8s ease-in-out infinite;
+}
+
+/* Mobile Menu Button - ULTRA MEJORADO */
+.mobile-menu-button {
+  display: none;
+  position: relative;
+  width: 52px;
+  height: 52px;
+  overflow: hidden;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0.35) 100%
+  );
+  backdrop-filter: blur(16px) saturate(170%);
+  -webkit-backdrop-filter: blur(16px) saturate(170%);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 18px;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+  box-shadow:
+    inset 0 2px 6px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -2px 6px 0 rgba(0, 0, 0, 0.1),
+    0 6px 16px 0 rgba(0, 0, 0, 0.12),
+    0 0 0 0 rgba(59, 130, 246, 0);
+}
+
+/* Efecto de brillo */
+.mobile-menu-button::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -100%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.5) 0%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: all 0.6s ease;
+  pointer-events: none;
+}
+
+.mobile-menu-button:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.45) 0%,
+    rgba(255, 255, 255, 0.35) 50%,
+    rgba(255, 255, 255, 0.45) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.7);
+  transform: scale(1.05);
+
+  box-shadow:
+    inset 0 2px 8px 0 rgba(255, 255, 255, 0.7),
+    inset 0 -2px 8px 0 rgba(0, 0, 0, 0.1),
+    0 0 0 4px rgba(59, 130, 246, 0.15),
+    0 8px 32px 0 rgba(59, 130, 246, 0.3),
+    0 0 48px rgba(139, 92, 246, 0.2);
+}
+
+.mobile-menu-button:hover::before {
+  opacity: 1;
+  left: 100%;
+}
+
+.mobile-menu-button:active {
+  transform: scale(0.98);
+}
+
+@media (max-width: 1023px) {
+  .mobile-menu-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* Hamburger Icon - MEJORADO */
+.hamburger {
+  position: relative;
+  width: 28px;
+  height: 22px;
+}
+
+.hamburger span {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 3.5px;
+  background: linear-gradient(
+    90deg,
+    #3b82f6 0%,
+    #8b5cf6 50%,
+    #ec4899 100%
+  );
+  background-size: 200% 100%;
+  border-radius: 3px;
+  box-shadow:
+    0 2px 8px rgba(59, 130, 246, 0.4),
+    0 0 16px rgba(139, 92, 246, 0.3);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: hamburger-glow 2s ease-in-out infinite;
+}
+
+@keyframes hamburger-glow {
+  0%, 100% {
+    background-position: 0% 50%;
+    box-shadow:
+      0 2px 8px rgba(59, 130, 246, 0.4),
+      0 0 16px rgba(139, 92, 246, 0.3);
+  }
+  50% {
+    background-position: 100% 50%;
+    box-shadow:
+      0 2px 12px rgba(59, 130, 246, 0.6),
+      0 0 24px rgba(139, 92, 246, 0.5);
+  }
+}
+
+.hamburger span:nth-child(1) {
+  top: 0;
+}
+
+.hamburger span:nth-child(2) {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.hamburger span:nth-child(3) {
+  bottom: 0;
+}
+
+/* Hamburger Animation when Open */
+.hamburger.open span:nth-child(1) {
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+  background: linear-gradient(90deg, #ec4899 0%, #8b5cf6 100%);
+  box-shadow:
+    0 2px 12px rgba(236, 72, 153, 0.6),
+    0 0 24px rgba(139, 92, 246, 0.5);
+}
+
+.hamburger.open span:nth-child(2) {
+  opacity: 0;
+  transform: translateY(-50%) scale(0);
+}
+
+.hamburger.open span:nth-child(3) {
+  bottom: 50%;
+  transform: translateY(50%) rotate(-45deg);
+  background: linear-gradient(90deg, #ec4899 0%, #8b5cf6 100%);
+  box-shadow:
+    0 2px 12px rgba(236, 72, 153, 0.6),
+    0 0 24px rgba(139, 92, 246, 0.5);
+}
+
+/* Mobile Menu Overlay */
+.mobile-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 998;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.mobile-menu-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Mobile Menu Panel */
+.mobile-menu-panel {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 85%;
+  max-width: 400px;
+  height: 100vh;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.9) 50%,
+    rgba(255, 255, 255, 0.95) 100%
+  );
+  backdrop-filter: blur(40px) saturate(200%) brightness(1.1);
+  -webkit-backdrop-filter: blur(40px) saturate(200%) brightness(1.1);
+  border-left: 2px solid rgba(255, 255, 255, 0.5);
+  z-index: 999;
+  transition: right 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  overflow-y: auto;
+
+  box-shadow:
+    -10px 0 50px 0 rgba(0, 0, 0, 0.15),
+    inset 2px 0 4px 0 rgba(255, 255, 255, 0.6),
+    inset -2px 0 4px 0 rgba(0, 0, 0, 0.05);
+}
+
+.mobile-menu-panel.open {
+  right: 0;
+}
+
+/* Mobile Menu Content */
+.mobile-menu-content {
+  padding: 100px 30px 40px;
+}
+
+/* Mobile Menu Links - ULTRA MEJORADO */
+.mobile-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 1.125rem;
+  padding: 20px 28px;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0.5) 100%
+  );
+  backdrop-filter: blur(16px) saturate(170%);
+  -webkit-backdrop-filter: blur(16px) saturate(170%);
+
+  border-radius: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+
+  color: #0f172a;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+
+  box-shadow:
+    inset 0 2px 6px rgba(255, 255, 255, 0.6),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.08),
+    0 6px 16px rgba(0, 0, 0, 0.1),
+    0 0 0 0 rgba(59, 130, 246, 0);
+
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Efecto de brillo */
+.mobile-nav-link::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -100%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.5) 0%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: all 0.6s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* PartÃ­culas */
+.mobile-nav-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.2) 0%, transparent 50%),
+    radial-gradient(circle at 80% 50%, rgba(139, 92, 246, 0.2) 0%, transparent 50%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: inherit;
+}
+
+.mobile-nav-link svg {
+  flex-shrink: 0;
+  stroke: #3b82f6;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 2px 4px rgba(59, 130, 246, 0.3));
+}
+
+.mobile-nav-link:active {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.6) 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0.6) 100%
+  );
+
+  border-color: rgba(255, 255, 255, 0.6);
+
+  box-shadow:
+    inset 0 2px 8px rgba(255, 255, 255, 0.7),
+    inset 0 -2px 8px rgba(0, 0, 0, 0.1),
+    0 8px 24px rgba(59, 130, 246, 0.4),
+    0 0 48px rgba(139, 92, 246, 0.3),
+    0 0 0 4px rgba(59, 130, 246, 0.2);
+
+  transform: translateY(-4px) scale(1.02);
+}
+
+.mobile-nav-link:active::before {
+  opacity: 1;
+  left: 100%;
+}
+
+.mobile-nav-link:active::after {
+  opacity: 1;
+}
+
+.mobile-nav-link:active svg {
+  stroke: #8b5cf6;
+  transform: scale(1.15) rotate(5deg);
+  filter: drop-shadow(0 4px 8px rgba(139, 92, 246, 0.5));
+}
+
+/* Mobile Demo Button */
+.mobile-demo-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 1.125rem;
+  padding: 20px 24px;
+  margin-top: 24px;
+
+  background: linear-gradient(
+    135deg,
+    #3b82f6 0%,
+    #8b5cf6 50%,
+    #ec4899 100%
+  );
+  background-size: 200% 200%;
+  animation: gradient-shift 4s ease infinite;
+
+  color: white;
+  border-radius: 16px;
+  border: none;
+
+  box-shadow:
+    0 10px 40px 0 rgba(59, 130, 246, 0.4),
+    0 5px 20px 0 rgba(139, 92, 246, 0.3),
+    inset 0 2px 4px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -2px 4px 0 rgba(0, 0, 0, 0.2);
+
+  transition: all 0.3s ease;
+}
+
+.mobile-demo-button svg {
+  flex-shrink: 0;
+  stroke: white;
+  transition: all 0.3s ease;
+}
+
+.mobile-demo-button:active {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow:
+    0 15px 50px 0 rgba(59, 130, 246, 0.5),
+    0 8px 30px 0 rgba(139, 92, 246, 0.4),
+    0 0 60px 0 rgba(236, 72, 153, 0.3),
+    inset 0 2px 4px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -2px 4px 0 rgba(0, 0, 0, 0.2);
+}
+
+.mobile-demo-button:active svg {
+  transform: scale(1.1) rotate(5deg);
+}
+
+/* Close Button */
+.mobile-menu-close {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.4) 100%
+  );
+  backdrop-filter: blur(10px) saturate(150%);
+  -webkit-backdrop-filter: blur(10px) saturate(150%);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow:
+    inset 0 2px 4px rgba(255, 255, 255, 0.4),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.05),
+    0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-menu-close:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(239, 68, 68, 0.3) 0%,
+    rgba(220, 38, 38, 0.2) 50%,
+    rgba(239, 68, 68, 0.3) 100%
+  );
+  border-color: rgba(239, 68, 68, 0.6);
+  box-shadow:
+    inset 0 2px 4px rgba(255, 255, 255, 0.5),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.08),
+    0 0 0 3px rgba(239, 68, 68, 0.1),
+    0 8px 20px rgba(239, 68, 68, 0.2);
+}
+
+.mobile-menu-close svg {
+  width: 24px;
+  height: 24px;
+  stroke: #ef4444;
+  stroke-width: 2.5;
+}
+
+.demo-button-ultra {
+  position: relative;
+  font-family: 'Inter', sans-serif;
+  font-weight: 800;
+  overflow: hidden;
+
+  background: linear-gradient(
+    135deg,
+    #3b82f6 0%,
+    #8b5cf6 25%,
+    #ec4899 50%,
+    #8b5cf6 75%,
+    #3b82f6 100%
+  );
+  background-size: 300% 300%;
+  animation: gradient-shift 3s ease infinite;
+
+  box-shadow:
+    /* Sombras exteriores con colores */
+    0 0 40px rgba(59, 130, 246, 0.7),
+    0 0 80px rgba(139, 92, 246, 0.5),
+    0 0 120px rgba(236, 72, 153, 0.4),
+    /* Sombras de profundidad */
+    0 12px 48px rgba(59, 130, 246, 0.6),
+    0 6px 24px rgba(139, 92, 246, 0.5),
+    /* Sombras internas */
+    inset 0 2px 6px rgba(255, 255, 255, 0.6),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.2);
+
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* AnimaciÃ³n de pulsaciÃ³n */
+  animation: button-pulse-ultra 2s ease-in-out infinite, gradient-shift 3s ease infinite;
+}
+
+/* Efecto de brillo que se mueve */
+.demo-button-ultra::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -100%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 100%
+  );
+  transform: skewX(-20deg);
+  transition: left 0.7s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* PartÃ­culas brillantes */
+.demo-button-ultra::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.3) 0%, transparent 30%),
+    radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.3) 0%, transparent 30%),
+    radial-gradient(circle at 50% 20%, rgba(255, 255, 255, 0.2) 0%, transparent 30%),
+    radial-gradient(circle at 50% 80%, rgba(255, 255, 255, 0.2) 0%, transparent 30%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.demo-button-ultra:hover {
+  transform: translateY(-6px) scale(1.1);
+
+  box-shadow:
+    /* Glow extremo en hover */
+    0 0 60px rgba(59, 130, 246, 1),
+    0 0 120px rgba(139, 92, 246, 0.8),
+    0 0 180px rgba(236, 72, 153, 0.6),
+    /* Sombras de elevaciÃ³n */
+    0 24px 72px rgba(59, 130, 246, 0.7),
+    0 12px 48px rgba(139, 92, 246, 0.6),
+    /* Sombras internas */
+    inset 0 2px 8px rgba(255, 255, 255, 0.7),
+    inset 0 -2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.demo-button-ultra:hover::before {
+  left: 100%;
+}
+
+.demo-button-ultra:hover::after {
+  opacity: 1;
+}
+
+/* Efecto de presiÃ³n */
+.demo-button-ultra:active {
+  transform: translateY(-3px) scale(1.05);
+}
+
+@keyframes button-pulse-ultra {
+  0%, 100% {
+    box-shadow:
+      0 0 30px rgba(59, 130, 246, 0.6),
+      0 0 60px rgba(139, 92, 246, 0.4),
+      0 0 90px rgba(236, 72, 153, 0.3),
+      0 10px 40px rgba(59, 130, 246, 0.5),
+      0 5px 20px rgba(139, 92, 246, 0.4),
+      inset 0 2px 4px rgba(255, 255, 255, 0.5),
+      inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+  }
+  50% {
+    box-shadow:
+      0 0 50px rgba(59, 130, 246, 0.8),
+      0 0 100px rgba(139, 92, 246, 0.6),
+      0 0 150px rgba(236, 72, 153, 0.5),
+      0 15px 50px rgba(59, 130, 246, 0.6),
+      0 8px 30px rgba(139, 92, 246, 0.5),
+      inset 0 2px 4px rgba(255, 255, 255, 0.6),
+      inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+  }
+}
+
+.glass-nav-shine,
+.glass-nav-particles,
+.glass-nav-caustics,
+.glass-nav-spectrum {
+  will-change: transform;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+/* Optimize touch interactions on mobile */
+@media (max-width: 768px) {
+  /* Reduce animation complexity */
+  .animate-float {
+    animation-duration: 10s !important;
+  }
+
+  /* Simplify hover effects on touch devices */
+  .hover-scale:hover {
+    transform: scale(1.02) !important;
+  }
+
+  /* Reduce blur on inputs for better performance */
+  .input-liquid-glass {
+    backdrop-filter: blur(10px) saturate(140%) !important;
+    -webkit-backdrop-filter: blur(10px) saturate(140%) !important;
+  }
+
+  /* Optimize button shadows on mobile */
+  .submit-button-liquid,
+  .hero-button-primary {
+    box-shadow:
+      0 0 20px rgba(59, 130, 246, 0.4),
+      0 5px 15px rgba(59, 130, 246, 0.3),
+      inset 0 1px 2px rgba(255, 255, 255, 0.3) !important;
+  }
+
+  .submit-button-liquid:hover,
+  .hero-button-primary:hover {
+    box-shadow:
+      0 0 30px rgba(59, 130, 246, 0.5),
+      0 8px 20px rgba(59, 130, 246, 0.4),
+      inset 0 1px 2px rgba(255, 255, 255, 0.4) !important;
+  }
+
+  /* Disable expensive animations on low-end devices */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* Optimize background gradients on mobile */
+  .glass-nav-blur-mask,
+  .glass-nav-caustics {
+    background-size: 200% 200% !important;
+  }
+
+  /* Reduce particle density on mobile */
+  .glass-nav-particles {
+    background-size:
+      150px 150px,
+      180px 180px,
+      200px 200px !important;
+  }
+}
+
+/* Touch Targets - Minimum 44x44px for mobile */
+@media (max-width: 768px) {
+  a, button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Prevent horizontal scroll on mobile */
+@media (max-width: 768px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  * {
+    max-width: 100%;
+  }
+}
+
+/* Optimize animations for mobile */
+@media (max-width: 768px) and (prefers-reduced-motion: no-preference) {
+  .animate-float {
+    animation-duration: 12s !important;
+  }
+
+  .hover-scale:active {
+    transform: scale(0.98) !important;
+  }
+}
+

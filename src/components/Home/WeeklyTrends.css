@@ -1,0 +1,208 @@
+.weekly-trends-section {
+    padding: var(--spacing-3xl) 0;
+}
+
+.weekly-trends-section .section-header {
+    text-align: center;
+    margin-bottom: var(--spacing-2xl);
+}
+
+.weekly-trends-section .section-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    font-weight: 800;
+    margin-bottom: var(--spacing-xs);
+}
+
+.title-icon.trophy {
+    color: #ffd700;
+}
+
+.weekly-trends-section .section-subtitle {
+    color: var(--color-text-muted);
+    font-size: 1rem;
+}
+
+.trends-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--spacing-lg);
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.trend-card {
+    padding: var(--spacing-md);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    position: relative;
+}
+
+.trend-card.featured {
+    grid-column: span 2;
+    display: flex;
+    gap: var(--spacing-xl);
+    padding: var(--spacing-xl);
+}
+
+.crown-badge {
+    position: absolute;
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.trend-cover {
+    position: relative;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.trend-card:not(.featured) .trend-cover {
+    width: 100%;
+    aspect-ratio: 1;
+    margin-bottom: var(--spacing-md);
+}
+
+.trend-card.featured .trend-cover {
+    width: 180px;
+    height: 180px;
+    flex-shrink: 0;
+}
+
+.trend-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-slow);
+}
+
+.trend-card:hover .trend-cover img {
+    transform: scale(1.1);
+}
+
+.trend-cover .play-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    font-size: 2rem;
+    opacity: 0;
+    transition: opacity var(--transition-base);
+}
+
+.trend-card:hover .play-overlay {
+    opacity: 1;
+}
+
+.trend-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.trend-card.featured .trend-info {
+    justify-content: center;
+}
+
+.trend-position {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    margin-bottom: 4px;
+}
+
+.position {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--color-accent-primary);
+}
+
+.trend-up {
+    color: #22c55e;
+    font-size: 0.8rem;
+}
+
+.trend-down {
+    color: #ef4444;
+    font-size: 0.8rem;
+}
+
+.trend-same {
+    color: var(--color-text-muted);
+    font-size: 0.8rem;
+}
+
+.trend-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.trend-card.featured .trend-title {
+    font-size: 1.5rem;
+}
+
+.trend-album {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin: 0;
+}
+
+.trend-plays {
+    font-size: 0.8rem;
+    color: var(--color-accent-secondary);
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .trends-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+
+    .trend-card.featured {
+        grid-column: span 1;
+        flex-direction: column;
+    }
+
+    .trend-card.featured .trend-cover {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1;
+    }
+
+    .trend-card.featured .trend-title {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 520px) {
+    .trend-card {
+        padding: 10px;
+    }
+
+    .trend-title {
+        font-size: 0.95rem;
+    }
+
+    .trend-album,
+    .trend-plays {
+        font-size: 0.78rem;
+    }
+}

@@ -1,0 +1,40 @@
+{
+  "name": "garmusicwebv2",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:web": "vite --port 5173",
+    "dev:api": "node server/index.mjs",
+    "dev:full": "concurrently \"npm:dev:api\" \"npm:dev:web\"",
+    "build": "tsc && vite build",
+    "start": "node server/index.mjs",
+    "preview": "node server/index.mjs"
+  },
+  "devDependencies": {
+    "@types/howler": "^2.2.12",
+    "@types/node": "^25.2.1",
+    "@types/react": "^19.2.13",
+    "@types/react-dom": "^19.2.3",
+    "concurrently": "^9.2.1",
+    "typescript": "~5.9.3",
+    "vite": "^7.2.4"
+  },
+  "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
+    "@supabase/supabase-js": "^2.98.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "framer-motion": "^12.33.0",
+    "howler": "^2.2.4",
+    "multer": "^2.0.2",
+    "react-icons": "^5.5.0",
+    "react-markdown": "^9.0.3",
+    "react-router-dom": "^7.13.0",
+    "recharts": "^3.7.0"
+  }
+}

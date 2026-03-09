@@ -1,0 +1,20 @@
+{
+  "name": "FGAROLA Music",
+  "short_name": "FGAROLA",
+  "description": "Escucha la musica de FGAROLA y sigue sus lanzamientos.",
+  "lang": "es-ES",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#060912",
+  "theme_color": "#667eea",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

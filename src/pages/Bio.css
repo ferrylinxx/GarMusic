@@ -1,0 +1,305 @@
+.bio-page {
+    padding-top: calc(var(--navbar-height) + var(--spacing-3xl));
+    padding-bottom: calc(var(--player-height) + 34px);
+}
+
+.bio-hero {
+    border-radius: var(--radius-2xl);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: var(--spacing-xl);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-2xl);
+}
+
+.bio-hero-media {
+    min-width: 0;
+}
+
+.bio-image {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: var(--radius-xl);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.bio-hero-copy {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    justify-content: center;
+}
+
+.bio-kicker {
+    width: fit-content;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--color-text-muted);
+    font-size: 0.74rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 700;
+    padding: 6px 12px;
+}
+
+.bio-title {
+    font-size: clamp(2rem, 4.8vw, 3.2rem);
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    margin: 0;
+}
+
+.bio-summary {
+    color: var(--color-text-secondary);
+    font-size: 1.04rem;
+    line-height: 1.7;
+    max-width: 760px;
+}
+
+.bio-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.bio-metric {
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.04);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.bio-metric strong {
+    font-size: 1.35rem;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.bio-metric span {
+    color: var(--color-text-muted);
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.bio-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+    margin-top: 2px;
+}
+
+.bio-layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: var(--spacing-xl);
+}
+
+.bio-mobile-tabs {
+    display: none;
+}
+
+.bio-sidebar {
+    border-radius: var(--radius-xl);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    padding: var(--spacing-lg);
+    height: fit-content;
+    position: sticky;
+    top: calc(var(--navbar-height) + var(--spacing-md));
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.bio-side-section h2 {
+    font-size: 1.05rem;
+    margin-bottom: var(--spacing-sm);
+}
+
+.bio-social-links {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.bio-social-links a {
+    text-decoration: none;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--color-text-secondary);
+    padding: 0.56rem 0.7rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    transition: all var(--transition-base);
+}
+
+.bio-social-links a:hover {
+    border-color: rgba(102, 126, 234, 0.5);
+    background: rgba(102, 126, 234, 0.12);
+    color: var(--color-text-primary);
+}
+
+.bio-side-empty {
+    color: var(--color-text-muted);
+    font-size: 0.88rem;
+}
+
+.bio-summary-list {
+    margin: 0;
+    padding-left: 1.05rem;
+    color: var(--color-text-secondary);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    line-height: 1.5;
+}
+
+.bio-markdown {
+    border-radius: var(--radius-xl);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    padding: clamp(16px, 2.4vw, 30px);
+}
+
+.bio-markdown h2 {
+    font-size: clamp(1.35rem, 2.6vw, 1.85rem);
+    margin: 0 0 var(--spacing-sm);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+}
+
+.bio-markdown h2 + p {
+    margin-top: 0;
+}
+
+.bio-markdown p {
+    color: var(--color-text-secondary);
+    font-size: 1.01rem;
+    line-height: 1.82;
+    margin: 0 0 var(--spacing-md);
+}
+
+.bio-markdown ul {
+    padding-left: 1.1rem;
+    margin: 0 0 var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.bio-markdown li {
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+}
+
+.bio-markdown strong {
+    color: var(--color-text-primary);
+}
+
+.bio-markdown a {
+    color: var(--color-accent-primary);
+}
+
+@media (max-width: 1024px) {
+    .bio-hero {
+        grid-template-columns: 280px 1fr;
+    }
+
+    .bio-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .bio-sidebar {
+        position: relative;
+        top: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .bio-page {
+        padding-top: calc(var(--navbar-height-mobile) + var(--spacing-lg));
+        padding-bottom: calc(var(--player-height-mobile) + 18px);
+    }
+
+    .bio-hero {
+        grid-template-columns: 1fr;
+        padding: var(--spacing-lg);
+    }
+
+    .bio-metrics {
+        grid-template-columns: 1fr;
+    }
+
+    .bio-layout {
+        gap: var(--spacing-md);
+    }
+
+    .bio-mobile-tabs {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .bio-mobile-tab {
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: var(--radius-full);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--color-text-secondary);
+        font-size: 0.82rem;
+        font-weight: 700;
+        padding: 0.5rem 0.65rem;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+    }
+
+    .bio-mobile-tab.active {
+        background: var(--gradient-primary);
+        border-color: transparent;
+        color: #fff;
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .bio-sidebar.mobile-hidden,
+    .bio-markdown.mobile-hidden {
+        display: none;
+    }
+
+    .bio-sidebar {
+        padding: var(--spacing-md);
+    }
+
+    .bio-markdown {
+        padding: var(--spacing-md);
+    }
+
+    .bio-summary {
+        font-size: 0.98rem;
+        line-height: 1.58;
+    }
+
+    .bio-markdown p {
+        line-height: 1.7;
+        font-size: 0.96rem;
+    }
+}
+
+@media (max-width: 560px) {
+    .bio-page {
+        padding-top: calc(var(--navbar-height-mobile) + 12px);
+    }
+
+    .bio-hero {
+        gap: var(--spacing-md);
+        padding: 14px;
+    }
+}
