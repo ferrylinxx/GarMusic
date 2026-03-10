@@ -2,8 +2,28 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     {
-      "source": "/api/:route*",
-      "destination": "/api?route=:route*"
+      "source": "/api/:s1/:s2/:s3/:s4/:s5/:s6",
+      "destination": "/api?s1=:s1&s2=:s2&s3=:s3&s4=:s4&s5=:s5&s6=:s6"
+    },
+    {
+      "source": "/api/:s1/:s2/:s3/:s4/:s5",
+      "destination": "/api?s1=:s1&s2=:s2&s3=:s3&s4=:s4&s5=:s5"
+    },
+    {
+      "source": "/api/:s1/:s2/:s3/:s4",
+      "destination": "/api?s1=:s1&s2=:s2&s3=:s3&s4=:s4"
+    },
+    {
+      "source": "/api/:s1/:s2/:s3",
+      "destination": "/api?s1=:s1&s2=:s2&s3=:s3"
+    },
+    {
+      "source": "/api/:s1/:s2",
+      "destination": "/api?s1=:s1&s2=:s2"
+    },
+    {
+      "source": "/api/:s1",
+      "destination": "/api?s1=:s1"
     },
     {
       "source": "/admin",
