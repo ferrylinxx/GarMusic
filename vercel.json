@@ -2,11 +2,31 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     {
-      "source": "/api/:path*",
-      "destination": "/api/:path*"
+      "source": "/admin",
+      "destination": "/index.html"
     },
     {
-      "source": "/:path*",
+      "source": "/admin/:path*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/musica",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/musica/:path*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/playlist/:path*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/bio",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/contacto",
       "destination": "/index.html"
     }
   ]
