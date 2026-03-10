@@ -14,8 +14,8 @@ dist-ssr
 .env
 .env.*
 !.env.example
-data/
-data-test/
+/data/
+/data-test/
 
 # Editor directories and files
 .vscode/*
