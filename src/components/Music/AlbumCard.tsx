@@ -23,26 +23,45 @@ const AlbumCard = ({ album, badges = [], isFavorite = false, onAddToQueue, onTog
     const [isPreviewing, setIsPreviewing] = useState(false);
     const [previewProgress, setPreviewProgress] = useState(0);
     const [menuOpen, setMenuOpen] = useState(false);
+    const cardRef = useRef<HTMLDivElement | null>(null);
     const previewRef = useRef<HTMLAudioElement | null>(null);
+    const preloadedPreviewRef = useRef<HTMLAudioElement | null>(null);
     const progressFrameRef = useRef<number | null>(null);
     const hoverTimeoutRef = useRef<number | null>(null);
+    const warmupTimeoutRef = useRef<number | null>(null);
     const menuRef = useRef<HTMLDivElement | null>(null);
     const hoveredRef = useRef(false);
+    const previewUrlRef = useRef('');
+    const previewPreparationRef = useRef<Promise<void> | null>(null);
 
     const PREVIEW_DURATION = 30; // 30 seconds preview
 
+    const disposeAudio = (audio: HTMLAudioElement | null) => {
+        if (!audio) return;
+        try {
+            audio.pause();
+            audio.currentTime = 0;
+            audio.onended = null;
+            audio.onerror = null;
+            audio.src = '';
+            audio.load();
+        } catch {
+            // ignore cleanup failures on restrictive browsers
+        }
+    };
+
     useEffect(() => {
         return () => {
-            if (previewRef.current) {
-                previewRef.current.pause();
-                previewRef.current.src = '';
-                previewRef.current.load();
-            }
+            disposeAudio(previewRef.current);
+            disposeAudio(preloadedPreviewRef.current);
             if (progressFrameRef.current !== null) {
                 cancelAnimationFrame(progressFrameRef.current);
             }
             if (hoverTimeoutRef.current) {
                 clearTimeout(hoverTimeoutRef.current);
+            }
+            if (warmupTimeoutRef.current) {
+                clearTimeout(warmupTimeoutRef.current);
             }
         };
     }, []);
@@ -63,8 +82,46 @@ const AlbumCard = ({ album, badges = [], isFavorite = false, onAddToQueue, onTog
     useEffect(() => {
         if (dataSaverEnabled) {
             stopPreview();
+            disposeAudio(preloadedPreviewRef.current);
+            preloadedPreviewRef.current = null;
         }
     }, [dataSaverEnabled]);
+
+    useEffect(() => {
+        stopPreview();
+        disposeAudio(preloadedPreviewRef.current);
+        preloadedPreviewRef.current = null;
+        previewUrlRef.current = '';
+        previewPreparationRef.current = null;
+    }, [album.id, album.tracks]);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        if (dataSaverEnabled || album.tracks.length === 0) return;
+        if (!cardRef.current) return;
+
+        const node = cardRef.current;
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (!entries.some((entry) => entry.isIntersecting)) return;
+                observer.disconnect();
+                warmupTimeoutRef.current = window.setTimeout(() => {
+                    void preparePreview();
+                }, 40);
+            },
+            { rootMargin: '220px 0px' }
+        );
+
+        observer.observe(node);
+
+        return () => {
+            observer.disconnect();
+            if (warmupTimeoutRef.current) {
+                clearTimeout(warmupTimeoutRef.current);
+                warmupTimeoutRef.current = null;
+            }
+        };
+    }, [album.id, album.tracks, dataSaverEnabled]);
 
     const syncPreviewProgress = () => {
         if (!previewRef.current) return;
@@ -94,35 +151,94 @@ const AlbumCard = ({ album, badges = [], isFavorite = false, onAddToQueue, onTog
         navigate(`/musica/album/${album.id}`);
     };
 
+    const resolvePreviewUrl = async (): Promise<string> => {
+        const track = album.tracks[0];
+        if (!track) return '';
+
+        const preferred = db.getPreferredAudioUrl(track.id, track.audioFile);
+        if (preferred) {
+            previewUrlRef.current = preferred;
+            return preferred;
+        }
+
+        if (previewUrlRef.current) return previewUrlRef.current;
+
+        const nextUrl = (await db.prefetchAudioUrl(track.id, track.audioFile)) || '';
+        previewUrlRef.current = nextUrl;
+        return nextUrl;
+    };
+
+    const preparePreview = async () => {
+        if (dataSaverEnabled || album.tracks.length === 0) return;
+        if (preloadedPreviewRef.current || previewPreparationRef.current) return;
+
+        previewPreparationRef.current = (async () => {
+            const audioUrl = await resolvePreviewUrl();
+            if (!audioUrl || previewRef.current) return;
+
+            const audio = new Audio(audioUrl);
+            audio.preload = 'auto';
+            audio.muted = true;
+            audio.volume = 0;
+            audio.setAttribute('playsinline', 'true');
+
+            try {
+                audio.load();
+            } catch {
+                // ignore preload failures on restrictive browsers
+            }
+
+            preloadedPreviewRef.current = audio;
+        })().finally(() => {
+            previewPreparationRef.current = null;
+        });
+
+        await previewPreparationRef.current;
+    };
+
     const startPreview = async (options: { immediate?: boolean } = {}) => {
         if (album.tracks.length === 0) return;
         if (dataSaverEnabled) return;
         if (previewRef.current || hoverTimeoutRef.current) return;
         hoveredRef.current = true;
 
+        const audioUrl = await resolvePreviewUrl();
+        if (!audioUrl || !hoveredRef.current) return;
+
+        let audio = preloadedPreviewRef.current;
+        if (audio) {
+            preloadedPreviewRef.current = null;
+            const activeSource = audio.currentSrc || audio.src;
+            if (activeSource && activeSource !== audioUrl) {
+                disposeAudio(audio);
+                audio = null;
+            }
+        }
+
+        if (!audio) {
+            audio = new Audio(audioUrl);
+            audio.preload = 'auto';
+            audio.setAttribute('playsinline', 'true');
+            try {
+                audio.load();
+            } catch {
+                // ignore preload failures on restrictive browsers
+            }
+        }
+
+        audio.volume = 0.4;
+        audio.muted = false;
+        audio.onended = () => {
+            stopPreview();
+        };
+        audio.onerror = () => {
+            stopPreview();
+        };
+        previewRef.current = audio;
+
         hoverTimeoutRef.current = window.setTimeout(async () => {
             hoverTimeoutRef.current = null;
             if (!hoveredRef.current) return;
-
-            const track = album.tracks[0];
-            const audioUrl = db.getImmediateAudioUrl(track.id, track.audioFile) || (await db.getAudioFileUrl(track.id));
-
-            if (!audioUrl) return;
-
-            const audio = new Audio(audioUrl);
-            audio.preload = 'auto';
-            audio.volume = 0.4;
-            audio.setAttribute('playsinline', 'true');
-
-            audio.onended = () => {
-                stopPreview();
-            };
-
-            audio.onerror = () => {
-                stopPreview();
-            };
-
-            previewRef.current = audio;
 
             try {
                 let started = false;
@@ -154,7 +270,7 @@ const AlbumCard = ({ album, badges = [], isFavorite = false, onAddToQueue, onTog
             } catch {
                 stopPreview();
             }
-        }, options.immediate ? 0 : 180);
+        }, options.immediate ? 0 : 36);
     };
 
     const stopPreview = () => {
@@ -164,10 +280,12 @@ const AlbumCard = ({ album, badges = [], isFavorite = false, onAddToQueue, onTog
             hoverTimeoutRef.current = null;
         }
         if (previewRef.current) {
-            previewRef.current.pause();
-            previewRef.current.currentTime = 0;
-            previewRef.current.src = '';
-            previewRef.current.load();
+            try {
+                previewRef.current.pause();
+                previewRef.current.currentTime = 0;
+            } catch {
+                // ignore reset failures on restrictive browsers
+            }
             previewRef.current = null;
         }
         if (progressFrameRef.current !== null) {
@@ -227,6 +345,7 @@ const AlbumCard = ({ album, badges = [], isFavorite = false, onAddToQueue, onTog
 
     return (
         <motion.div
+            ref={cardRef}
             className={`album-card glass ${isPreviewing ? 'previewing' : ''}`}
             whileHover={{ scale: 1.05, y: -5 }}
             transition={{ duration: 0.2 }}

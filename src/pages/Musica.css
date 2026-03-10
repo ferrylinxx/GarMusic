@@ -1498,3 +1498,123 @@
         right: calc(10px + env(safe-area-inset-right));
     }
 }
+
+/* Spotify theme overrides */
+.musica-page {
+    padding-top: calc(var(--navbar-height) + 48px);
+    background:
+        radial-gradient(circle at top, rgba(29, 185, 84, 0.14), transparent 18%),
+        linear-gradient(180deg, #121212 0%, #0a0a0a 48%, #050505 100%);
+}
+
+.music-intro,
+.music-controls,
+.featured-album-banner,
+.featured-carousel-section,
+.music-library-card,
+.music-activity-card,
+.continue-listening-card,
+.album-header,
+.empty-state {
+    background: linear-gradient(180deg, rgba(24, 24, 24, 0.98), rgba(16, 16, 16, 0.98));
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.28);
+}
+
+.page-title,
+.featured-title {
+    letter-spacing: -0.05em;
+}
+
+.music-intro-subtitle,
+.featured-meta,
+.music-metric small,
+.block-copy,
+.results-count,
+.library-section-head p,
+.library-empty,
+.album-section-meta,
+.featured-next-release {
+    color: #b3b3b3;
+}
+
+.metric-icon,
+.featured-type,
+.search-icon {
+    color: #1db954;
+}
+
+.music-metric,
+.library-track-main,
+.continue-track-btn,
+.featured-carousel-card {
+    border: none;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.music-controls {
+    top: calc(var(--navbar-height) + 18px);
+}
+
+.search-input,
+.sort-select,
+.view-toggle,
+.filter-btn,
+.clear-filters-btn,
+.album-open-link,
+.mobile-control-btn,
+.mobile-sort-option,
+.sheet-close-btn {
+    border: none;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.search-input:focus,
+.sort-select:focus,
+.filter-btn.active,
+.view-btn.active,
+.mobile-sort-option.active {
+    box-shadow: 0 0 0 1px rgba(29, 185, 84, 0.32);
+}
+
+.filter-btn.active,
+.view-btn.active,
+.activity-tab.active,
+.activity-mobile-tab.active {
+    background: #ffffff;
+    color: #111111;
+    box-shadow: none;
+}
+
+.featured-badge,
+.featured-play-btn,
+.featured-play-btn.compact {
+    background: #1db954;
+    color: #081109;
+}
+
+.featured-open-btn,
+.mobile-more-tracks-link,
+.activity-show-more-btn {
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.library-track-main:hover,
+.continue-track-btn:hover,
+.mobile-more-tracks-link:hover,
+.album-open-link:hover {
+    background: rgba(29, 185, 84, 0.14);
+    border-color: transparent;
+}
+
+.mobile-sheet {
+    border: none;
+    background: rgba(18, 18, 18, 0.98);
+    box-shadow: 0 24px 42px rgba(0, 0, 0, 0.4);
+}
+
+.mobile-resume-cta {
+    border: none;
+    background: rgba(18, 18, 18, 0.96);
+}

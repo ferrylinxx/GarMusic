@@ -347,3 +347,67 @@
         display: none;
     }
 }
+
+/* Spotify theme overrides */
+.hamburger-btn {
+    border: none;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.hamburger-btn.open {
+    background: #1ed760;
+    color: #081109;
+    box-shadow: 0 10px 22px rgba(29, 185, 84, 0.28);
+}
+
+.menu-overlay {
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.mobile-menu-panel {
+    border: none;
+    background: linear-gradient(180deg, rgba(24, 24, 24, 0.98), rgba(12, 12, 12, 0.98));
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.48);
+}
+
+.mobile-menu-panel::before,
+.mobile-menu-panel::after {
+    display: none;
+}
+
+.mobile-close,
+.mobile-nav-link,
+.mobile-menu-spotlight,
+.mobile-quick-btn,
+.mobile-menu-social a {
+    border: none;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.mobile-nav-link.active {
+    background: #ffffff;
+    border-color: transparent;
+    box-shadow: none;
+}
+
+.mobile-nav-link.active .mobile-nav-label,
+.mobile-nav-link.active .mobile-nav-index {
+    color: #111111;
+}
+
+.mobile-nav-index {
+    border: none;
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.mobile-spotlight-kicker {
+    color: #1ed760;
+}
+
+.mobile-spotlight-play {
+    background: #1ed760;
+    color: #081109;
+}

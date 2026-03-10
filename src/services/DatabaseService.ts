@@ -282,6 +282,7 @@ class ApiError extends Error {
 
 class DatabaseService {
     private audioUrlCache = new Map<string, CachedAudioUrl>();
+    private audioUrlRequestCache = new Map<string, Promise<string | null>>();
 
     private buildUrl(path: string): string {
         return `${API_BASE}${path}`;
@@ -296,6 +297,17 @@ class DatabaseService {
 
     getTrackStreamUrl(trackId: string): string {
         return this.toAbsoluteUrl(`/api/tracks/${encodeURIComponent(trackId)}/audio`);
+    }
+
+    getPreferredAudioUrl(trackId: string, audioFile?: string | null): string | null {
+        const normalized = String(audioFile || '').trim();
+        const cached = this.getCachedAudioUrl(trackId);
+
+        if (cached && (!normalized || normalized.startsWith('db:'))) {
+            return cached;
+        }
+
+        return this.getImmediateAudioUrl(trackId, normalized);
     }
 
     getImmediateAudioUrl(trackId: string, audioFile?: string | null): string | null {
@@ -325,6 +337,21 @@ class DatabaseService {
             url,
             expiresAt: Number.isFinite(normalizedExpiry) && normalizedExpiry > Date.now() ? normalizedExpiry : fallbackExpiry,
         });
+    }
+
+    async prefetchAudioUrl(trackId: string, audioFile?: string | null): Promise<string | null> {
+        const preferred = this.getPreferredAudioUrl(trackId, audioFile);
+        const normalized = String(audioFile || '').trim();
+
+        if (preferred && normalized && !normalized.startsWith('db:')) {
+            return preferred;
+        }
+
+        if (preferred && normalized.startsWith('db:') && preferred !== this.getTrackStreamUrl(trackId)) {
+            return preferred;
+        }
+
+        return this.getAudioFileUrl(trackId);
     }
 
     private async request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -435,6 +462,7 @@ class DatabaseService {
     // ============ AUDIO FILES ============
     async saveAudioFile(trackId: string, file: File): Promise<string> {
         this.audioUrlCache.delete(trackId);
+        this.audioUrlRequestCache.delete(trackId);
         const mimeType = (file.type || '').toLowerCase();
         const fallbackExtension =
             mimeType === 'audio/mp4' || mimeType === 'audio/x-m4a' || mimeType === 'video/mp4'
@@ -474,12 +502,18 @@ class DatabaseService {
     }
 
     async getAudioFileUrl(trackId: string): Promise<string | null> {
-        try {
-            const cached = this.getCachedAudioUrl(trackId);
-            if (cached) {
-                return cached;
-            }
+        const cached = this.getCachedAudioUrl(trackId);
+        if (cached) {
+            return cached;
+        }
 
+        const pendingRequest = this.audioUrlRequestCache.get(trackId);
+        if (pendingRequest) {
+            return pendingRequest;
+        }
+
+        const request = (async () => {
+        try {
             const info = await this.request<AudioInfoResponse>(
                 `/api/tracks/${encodeURIComponent(trackId)}/audio-info`
             );
@@ -497,10 +531,17 @@ class DatabaseService {
             }
             throw error;
         }
+        })().finally(() => {
+            this.audioUrlRequestCache.delete(trackId);
+        });
+
+        this.audioUrlRequestCache.set(trackId, request);
+        return request;
     }
 
     async deleteAudioFile(trackId: string): Promise<void> {
         this.audioUrlCache.delete(trackId);
+        this.audioUrlRequestCache.delete(trackId);
         await this.request(`/api/tracks/${encodeURIComponent(trackId)}/audio`, {
             method: 'DELETE',
         });

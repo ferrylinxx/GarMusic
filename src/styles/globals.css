@@ -291,3 +291,75 @@ body.mobile-menu-open {
   background: transparent;
   position: relative;
 }
+
+/* Spotify redesign */
+:root {
+  --color-bg-primary: #050505;
+  --color-bg-secondary: #0b0b0b;
+  --color-bg-tertiary: #121212;
+  --color-surface: #181818;
+  --color-surface-elevated: #202020;
+  --gradient-primary: linear-gradient(135deg, #1ed760 0%, #1db954 100%);
+  --gradient-secondary: linear-gradient(135deg, #1fdf64 0%, #169c46 100%);
+  --gradient-accent: linear-gradient(135deg, #1ed760 0%, #8cfcb2 100%);
+  --gradient-gold: linear-gradient(135deg, #eaff74 0%, #8cf76e 100%);
+  --gradient-hero:
+    radial-gradient(circle at 16% 12%, rgba(29, 185, 84, 0.24) 0%, transparent 34%),
+    radial-gradient(circle at 84% 0%, rgba(30, 215, 96, 0.18) 0%, transparent 26%),
+    linear-gradient(180deg, rgba(22, 22, 22, 0.98) 0%, rgba(6, 6, 6, 1) 100%);
+  --gradient-card: linear-gradient(180deg, rgba(32, 32, 32, 0.98) 0%, rgba(18, 18, 18, 0.98) 100%);
+  --gradient-dark: linear-gradient(180deg, #191919 0%, #090909 100%);
+  --color-accent-primary: #1db954;
+  --color-accent-primary-rgb: 29, 185, 84;
+  --color-accent-secondary: #1ed760;
+  --color-accent-gold: #eaff74;
+  --color-accent-purple: #1ed760;
+  --color-text-primary: #f5f5f5;
+  --color-text-secondary: #dedede;
+  --color-text-muted: #a7a7a7;
+  --glass-bg: rgba(24, 24, 24, 0.94);
+  --glass-bg-strong: rgba(28, 28, 28, 0.98);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-shadow: 0 20px 40px rgba(0, 0, 0, 0.34);
+  --glass-shadow-strong: 0 28px 60px rgba(0, 0, 0, 0.48);
+}
+
+body {
+  font-family: 'Manrope', 'Segoe UI', sans-serif;
+  background:
+    radial-gradient(circle at top, rgba(29, 185, 84, 0.14), transparent 18%),
+    linear-gradient(180deg, #121212 0%, #070707 46%, #040404 100%);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.page-title,
+.block-title,
+.hero-title {
+  font-family: 'Space Grotesk', 'Manrope', sans-serif;
+}
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(18px) saturate(120%);
+  -webkit-backdrop-filter: blur(18px) saturate(120%);
+}
+
+.glass-strong {
+  background: var(--glass-bg-strong);
+  backdrop-filter: blur(24px) saturate(120%);
+  -webkit-backdrop-filter: blur(24px) saturate(120%);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.btn-primary {
+  box-shadow: 0 14px 30px rgba(29, 185, 84, 0.22);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 18px 36px rgba(29, 185, 84, 0.32);
+}
