@@ -10,6 +10,7 @@ import { createClient } from '@supabase/supabase-js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, '..');
+const isDirectRun = process.argv[1] ? path.resolve(process.argv[1]) === __filename : false;
 
 const PORT = Number(process.env.PORT || 3001);
 
@@ -2008,12 +2009,15 @@ app.use((error, _req, res, _next) => {
     });
 });
 
-const server = app.listen(PORT, () => {
-    console.log(`[api] running on http://localhost:${PORT}`);
-    console.log(`[api] storage: supabase`);
-    console.log(`[api] supabase url: ${SUPABASE_URL}`);
-    console.log(`[api] audio bucket: ${SUPABASE_AUDIO_BUCKET}`);
-    console.log(`[api] assets bucket: ${SUPABASE_ASSETS_BUCKET}`);
-});
+const server = isDirectRun
+    ? app.listen(PORT, () => {
+          console.log(`[api] running on http://localhost:${PORT}`);
+          console.log(`[api] storage: supabase`);
+          console.log(`[api] supabase url: ${SUPABASE_URL}`);
+          console.log(`[api] audio bucket: ${SUPABASE_AUDIO_BUCKET}`);
+          console.log(`[api] assets bucket: ${SUPABASE_ASSETS_BUCKET}`);
+      })
+    : null;
 
 export { app, db, server };
+export default app;

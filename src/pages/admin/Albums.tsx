@@ -119,6 +119,7 @@ const Albums = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [loadError, setLoadError] = useState<string | null>(null);
     const [showSpotifyImporter, setShowSpotifyImporter] = useState(false);
     const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
     const [calendarMonth, setCalendarMonth] = useState(() => {
@@ -137,9 +138,17 @@ const Albums = () => {
 
     const loadAlbums = async () => {
         setIsLoading(true);
-        const data = await db.getAllAlbums(true);
-        setAlbums(data as AlbumWithAdminMeta[]);
-        setIsLoading(false);
+        setLoadError(null);
+        try {
+            const data = await db.getAllAlbums(true);
+            setAlbums(data as AlbumWithAdminMeta[]);
+        } catch (error) {
+            console.error('Error loading albums:', error);
+            setLoadError('No se pudieron cargar los albumes. Revisa la conexion con la API.');
+            setAlbums([]);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleDelete = async (id: string) => {
@@ -660,6 +669,8 @@ const Albums = () => {
                     onChange={(event) => setSearchTerm(event.target.value)}
                 />
             </div>
+
+            {loadError && <div className="admin-inline-feedback error">{loadError}</div>}
 
             {isLoading ? (
                 <div className="loading-state">

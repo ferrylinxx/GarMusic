@@ -96,7 +96,14 @@ export interface ReleasePreregistrationResult {
 }
 
 const rawApiBase = ((import.meta as ImportMeta & { env?: Record<string, string | undefined> }).env?.VITE_API_BASE_URL || '').trim();
-const API_BASE = rawApiBase.endsWith('/') ? rawApiBase.slice(0, -1) : rawApiBase;
+const normalizedApiBase = rawApiBase.endsWith('/') ? rawApiBase.slice(0, -1) : rawApiBase;
+const isLoopbackApiBase = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(normalizedApiBase);
+const shouldIgnoreLoopbackApiBase =
+    typeof window !== 'undefined' &&
+    window.location.hostname !== 'localhost' &&
+    window.location.hostname !== '127.0.0.1' &&
+    isLoopbackApiBase;
+const API_BASE = shouldIgnoreLoopbackApiBase ? '' : normalizedApiBase;
 
 const DEFAULT_ALBUM_COVER = '/images/albums/default.svg';
 
