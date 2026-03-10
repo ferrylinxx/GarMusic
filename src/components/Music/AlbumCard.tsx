@@ -3,10 +3,10 @@ import { Album } from '../../types/music';
 import { usePlayer } from '../../context/PlayerContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaPlay, FaClock, FaVolumeUp, FaEllipsisH, FaPlus, FaHeart, FaRegHeart, FaShareAlt } from 'react-icons/fa';
-import { Howl } from 'howler';
 import { useNavigate } from 'react-router-dom';
 import db from '../../services/DatabaseService';
 import useDataSaver from '../../hooks/useDataSaver';
+import { primeMediaPlayback } from '../../utils/mediaUnlock';
 import './AlbumCard.css';
 
 interface AlbumCardProps {
@@ -17,33 +17,6 @@ interface AlbumCardProps {
     onToggleFavorite?: () => void;
 }
 
-const inferPreviewFormats = (source: string): string[] | undefined => {
-    const normalized = String(source || '').trim().split('?')[0].toLowerCase();
-    const extension = normalized.includes('.') ? normalized.slice(normalized.lastIndexOf('.') + 1) : '';
-
-    const byExtension: Record<string, string> = {
-        mp3: 'mp3',
-        m4a: 'm4a',
-        aac: 'aac',
-        wav: 'wav',
-        ogg: 'ogg',
-        oga: 'ogg',
-        flac: 'flac',
-        webm: 'webm',
-        opus: 'opus',
-    };
-
-    if (extension && byExtension[extension]) {
-        return [byExtension[extension]];
-    }
-
-    if (normalized.includes('/api/tracks/') && normalized.includes('/audio')) {
-        return ['mp3', 'm4a', 'aac', 'wav', 'ogg', 'flac', 'webm', 'opus'];
-    }
-
-    return undefined;
-};
-
 const AlbumCard = ({ album, badges = [], isFavorite = false, onAddToQueue, onToggleFavorite }: AlbumCardProps) => {
     const { playAlbum } = usePlayer();
     const { dataSaverEnabled } = useDataSaver();
@@ -51,21 +24,23 @@ const AlbumCard = ({ album, badges = [], isFavorite = false, onAddToQueue, onTog
     const [isPreviewing, setIsPreviewing] = useState(false);
     const [previewProgress, setPreviewProgress] = useState(0);
     const [menuOpen, setMenuOpen] = useState(false);
-    const previewRef = useRef<Howl | null>(null);
-    const progressIntervalRef = useRef<number | null>(null);
+    const previewRef = useRef<HTMLAudioElement | null>(null);
+    const progressFrameRef = useRef<number | null>(null);
     const hoverTimeoutRef = useRef<number | null>(null);
     const menuRef = useRef<HTMLDivElement | null>(null);
+    const hoveredRef = useRef(false);
 
     const PREVIEW_DURATION = 30; // 30 seconds preview
 
     useEffect(() => {
         return () => {
-            // Cleanup on unmount
             if (previewRef.current) {
-                previewRef.current.unload();
+                previewRef.current.pause();
+                previewRef.current.src = '';
+                previewRef.current.load();
             }
-            if (progressIntervalRef.current) {
-                clearInterval(progressIntervalRef.current);
+            if (progressFrameRef.current !== null) {
+                cancelAnimationFrame(progressFrameRef.current);
             }
             if (hoverTimeoutRef.current) {
                 clearTimeout(hoverTimeoutRef.current);
@@ -92,6 +67,21 @@ const AlbumCard = ({ album, badges = [], isFavorite = false, onAddToQueue, onTog
         }
     }, [dataSaverEnabled]);
 
+    const syncPreviewProgress = () => {
+        if (!previewRef.current) return;
+
+        const currentTime = Number.isFinite(previewRef.current.currentTime) ? previewRef.current.currentTime : 0;
+        const progress = (currentTime / PREVIEW_DURATION) * 100;
+        setPreviewProgress(Math.min(progress, 100));
+
+        if (currentTime >= PREVIEW_DURATION) {
+            stopPreview();
+            return;
+        }
+
+        progressFrameRef.current = window.requestAnimationFrame(syncPreviewProgress);
+    };
+
     const handlePlayAlbum = (event: React.MouseEvent) => {
         event.stopPropagation();
         if (album.tracks.length > 0) {
@@ -109,63 +99,64 @@ const AlbumCard = ({ album, badges = [], isFavorite = false, onAddToQueue, onTog
         if (album.tracks.length === 0) return;
         if (dataSaverEnabled) return;
         if (previewRef.current || hoverTimeoutRef.current) return;
+        hoveredRef.current = true;
 
         hoverTimeoutRef.current = window.setTimeout(async () => {
+            hoverTimeoutRef.current = null;
+            if (!hoveredRef.current) return;
+
             const track = album.tracks[0];
             const audioUrl = db.getImmediateAudioUrl(track.id, track.audioFile) || (await db.getAudioFileUrl(track.id));
 
             if (!audioUrl) return;
-            const previewFormats = inferPreviewFormats(audioUrl);
+            const unlocked = await primeMediaPlayback();
+            if (!unlocked || !hoveredRef.current) return;
 
-            previewRef.current = new Howl({
-                src: [audioUrl],
-                ...(previewFormats ? { format: previewFormats } : {}),
-                html5: true,
-                volume: 0.4,
-                onplay: () => {
-                    setIsPreviewing(true);
-                    // Update progress
-                    progressIntervalRef.current = window.setInterval(() => {
-                        if (previewRef.current) {
-                            const seek = previewRef.current.seek() as number;
-                            const progress = (seek / PREVIEW_DURATION) * 100;
-                            setPreviewProgress(Math.min(progress, 100));
+            const audio = new Audio(audioUrl);
+            audio.preload = 'auto';
+            audio.volume = 0.4;
+            audio.setAttribute('playsinline', 'true');
 
-                            // Stop after 30 seconds
-                            if (seek >= PREVIEW_DURATION) {
-                                stopPreview();
-                            }
-                        }
-                    }, 100);
-                },
-                onend: () => {
-                    stopPreview();
-                },
-                onplayerror: () => {
-                    stopPreview();
-                },
-                onloaderror: () => {
-                    stopPreview();
-                },
-            });
+            audio.onended = () => {
+                stopPreview();
+            };
 
-            previewRef.current.play();
+            audio.onerror = () => {
+                stopPreview();
+            };
+
+            previewRef.current = audio;
+
+            try {
+                await audio.play();
+                if (!hoveredRef.current) {
+                    stopPreview();
+                    return;
+                }
+                setIsPreviewing(true);
+                syncPreviewProgress();
+            } catch {
+                stopPreview();
+            }
         }, options.immediate ? 0 : 180);
     };
 
     const stopPreview = () => {
+        hoveredRef.current = false;
         if (hoverTimeoutRef.current) {
             clearTimeout(hoverTimeoutRef.current);
             hoverTimeoutRef.current = null;
         }
         if (previewRef.current) {
-            previewRef.current.stop();
-            previewRef.current.unload();
+            previewRef.current.pause();
+            previewRef.current.currentTime = 0;
+            previewRef.current.src = '';
+            previewRef.current.load();
             previewRef.current = null;
         }
-        if (progressIntervalRef.current) {
-            clearInterval(progressIntervalRef.current);
-            progressIntervalRef.current = null;
+        if (progressFrameRef.current !== null) {
+            cancelAnimationFrame(progressFrameRef.current);
+            progressFrameRef.current = null;
         }
         setIsPreviewing(false);
         setPreviewProgress(0);
@@ -224,6 +215,7 @@ const AlbumCard = ({ album, badges = [], isFavorite = false, onAddToQueue, onTog
             whileHover={{ scale: 1.05, y: -5 }}
             transition={{ duration: 0.2 }}
             onMouseEnter={() => {
+                hoveredRef.current = true;
                 void startPreview();
             }}
             onMouseLeave={stopPreview}

@@ -6,6 +6,7 @@ import { useDiscography } from './DiscographyContext';
 import db from '../services/DatabaseService';
 import statsService from '../services/StatsService';
 import { trackEvent } from '../utils/analytics';
+import { primeMediaPlayback } from '../utils/mediaUnlock';
 
 interface PlayerContextType extends PlayerState {
     favoriteTrackIds: string[];
@@ -587,6 +588,22 @@ export const PlayerProvider = ({ children }: PlayerProviderProps) => {
                 window.clearTimeout(backendSyncTimeoutRef.current);
                 backendSyncTimeoutRef.current = undefined;
             }
+        };
+    }, []);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        const unlockPlayback = () => {
+            void primeMediaPlayback();
+        };
+
+        window.addEventListener('pointerdown', unlockPlayback, { passive: true });
+        window.addEventListener('keydown', unlockPlayback);
+
+        return () => {
+            window.removeEventListener('pointerdown', unlockPlayback);
+            window.removeEventListener('keydown', unlockPlayback);
         };
     }, []);
 
