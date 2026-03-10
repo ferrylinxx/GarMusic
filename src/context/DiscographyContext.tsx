@@ -124,17 +124,15 @@ export const DiscographyProvider = ({ children }: { children: ReactNode }) => {
     const getAlbumById = (id: string) => albums.find((album) => album.id === id);
 
     const getAudioUrl = async (trackId: string): Promise<string | null> => {
-        const dbUrl = await db.getAudioFileUrl(trackId);
-        if (dbUrl) return dbUrl;
-
         for (const album of albums) {
             const track = album.tracks.find((item) => item.id === trackId);
-            if (track && track.audioFile && !track.audioFile.startsWith('db:')) {
-                return track.audioFile;
+            if (track) {
+                const immediateUrl = db.getImmediateAudioUrl(track.id, track.audioFile);
+                if (immediateUrl) return immediateUrl;
             }
         }
 
-        return null;
+        return db.getAudioFileUrl(trackId);
     };
 
     return (

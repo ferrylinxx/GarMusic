@@ -108,6 +108,7 @@ const sanitizeScope = (scope) => scope.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 
 
 const getAudioPublicUrl = (trackId) => `/api/tracks/${encodeURIComponent(trackId)}/audio`;
 const RELEASE_POPUP_PREFIX = 'release-';
+const AUDIO_SIGNED_URL_TTL_SECONDS = 60 * 60;
 const DEFAULT_RELEASE_POPUP_WINDOW_DAYS = 14;
 const LIBRARY_MAX_QUEUE = 300;
 const LIBRARY_MAX_FAVORITES = 500;
@@ -413,6 +414,18 @@ const downloadStorageObject = async (bucket, objectPath) => {
     return Buffer.from(arrayBuffer);
 };
 
+const createStorageSignedUrl = async (bucket, objectPath, expiresInSeconds = AUDIO_SIGNED_URL_TTL_SECONDS) => {
+    if (!objectPath) return '';
+    const { data, error } = await supabase.storage.from(bucket).createSignedUrl(objectPath, expiresInSeconds);
+    if (error) {
+        if (isStorageNotFoundError(error)) {
+            return '';
+        }
+        ensureSupabaseResult(error, `sign ${bucket}/${objectPath}`);
+    }
+    return data?.signedUrl || '';
+};
+
 const unsupportedQuery = (method, query) => {
     throw new Error(`[supabase-db] Query no soportada (${method}): ${query}`);
 };
@@ -460,10 +473,13 @@ const db = {
             return data || undefined;
         }
 
-        if (sql === 'SELECT track_id, updated_at FROM audio_files WHERE track_id = ?') {
+        if (
+            sql === 'SELECT track_id, updated_at FROM audio_files WHERE track_id = ?' ||
+            sql === 'SELECT track_id, updated_at, file_path FROM audio_files WHERE track_id = ?'
+        ) {
             const { data, error } = await supabase
                 .from('audio_files')
-                .select('track_id,updated_at')
+                .select('track_id,updated_at,file_path')
                 .eq('track_id', params[0])
                 .maybeSingle();
             if (error && isAudioFilesFallbackError(error)) {
@@ -473,6 +489,7 @@ const db = {
                     ? {
                           track_id: params[0],
                           updated_at: Number(entry.updated_at || 0),
+                          file_path: entry.file_path || '',
                       }
                     : undefined;
             }
@@ -1368,14 +1385,16 @@ app.post('/api/tracks/:trackId/audio', upload.single('file'), async (req, res, n
 app.get('/api/tracks/:trackId/audio-info', async (req, res, next) => {
     try {
         const row = await db.get(
-            'SELECT track_id, updated_at FROM audio_files WHERE track_id = ?',
+            'SELECT track_id, updated_at, file_path FROM audio_files WHERE track_id = ?',
             req.params.trackId
         );
         const exists = !!row;
+        const signedUrl = exists ? await createStorageSignedUrl(SUPABASE_AUDIO_BUCKET, row.file_path) : '';
         res.json({
             exists,
-            url: exists ? getAudioPublicUrl(req.params.trackId) : null,
+            url: exists ? (signedUrl || getAudioPublicUrl(req.params.trackId)) : null,
             updatedAt: exists ? Number(row.updated_at || 0) : null,
+            expiresAt: exists ? nowMs() + AUDIO_SIGNED_URL_TTL_SECONDS * 1000 : null,
         });
     } catch (error) {
         next(error);
@@ -1390,6 +1409,13 @@ app.get('/api/tracks/:trackId/audio', async (req, res, next) => {
         );
         if (!row) {
             res.status(404).json({ error: 'Audio no encontrado' });
+            return;
+        }
+
+        const signedUrl = await createStorageSignedUrl(SUPABASE_AUDIO_BUCKET, row.file_path);
+        if (signedUrl) {
+            res.setHeader('Cache-Control', 'private, no-store, no-cache, must-revalidate');
+            res.redirect(307, signedUrl);
             return;
         }
 

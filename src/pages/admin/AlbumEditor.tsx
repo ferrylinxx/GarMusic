@@ -38,6 +38,7 @@ import {
 } from 'react-icons/fa';
 import db from '../../services/DatabaseService';
 import { Album, Track, TrackCredits } from '../../types/music';
+import { saveAlbumPreview } from '../../utils/albumPreview';
 import './admin.css';
 
 interface ExtendedAlbum extends Album {
@@ -547,7 +548,7 @@ const AlbumEditor = () => {
 
             const urls: Record<string, string> = {};
             for (const track of data.tracks) {
-                const url = await db.getAudioFileUrl(track.id);
+                const url = db.getImmediateAudioUrl(track.id, track.audioFile) || (await db.getAudioFileUrl(track.id));
                 if (url) urls[track.id] = url;
             }
             setAudioUrls(urls);
@@ -624,7 +625,7 @@ const AlbumEditor = () => {
     ): Promise<boolean> => {
         try {
             await db.saveAudioFile(trackId, file);
-            const persistedUrl = await db.getAudioFileUrl(trackId);
+            const persistedUrl = db.getTrackStreamUrl(trackId);
             const fallbackLocalUrl = URL.createObjectURL(file);
             const resolvedUrl = persistedUrl || fallbackLocalUrl;
 
@@ -912,7 +913,8 @@ const AlbumEditor = () => {
         }
 
         const fromCache = audioUrls[trackId];
-        const fromDb = fromCache || (await db.getAudioFileUrl(trackId));
+        const track = album.tracks.find((item) => item.id === trackId);
+        const fromDb = fromCache || db.getImmediateAudioUrl(trackId, track?.audioFile) || (await db.getAudioFileUrl(trackId));
         if (!fromDb || !audioRef.current) return;
 
         if (!fromCache) {
@@ -964,7 +966,11 @@ const AlbumEditor = () => {
     };
 
     const handlePreview = () => {
-        window.open('/musica', '_blank');
+        saveAlbumPreview({
+            ...album,
+            tracks: album.tracks.map((track) => sanitizeTrack(track)),
+        });
+        window.open(`/musica/album/${encodeURIComponent(album.id)}?preview=1`, '_blank', 'noopener,noreferrer');
     };
 
     const setAlbumType = (type: Album['type']) => {

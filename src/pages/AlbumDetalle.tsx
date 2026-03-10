@@ -1,4 +1,4 @@
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
 import {
@@ -19,6 +19,7 @@ import { useDiscography } from '../context/DiscographyContext';
 import { usePlayer } from '../context/PlayerContext';
 import useMediaQuery from '../hooks/useMediaQuery';
 import type { Track } from '../types/music';
+import { readAlbumPreview } from '../utils/albumPreview';
 import './AlbumDetalle.css';
 
 type PlaylistSort = 'album' | 'title' | 'duration';
@@ -35,6 +36,7 @@ const joinCredits = (value?: string[]): string =>
 
 const AlbumDetalle = () => {
     const { albumId } = useParams<{ albumId: string }>();
+    const location = useLocation();
     const { getAlbumById, isLoading } = useDiscography();
     const isMobileLayout = useMediaQuery('(max-width: 600px)');
     const {
@@ -54,7 +56,12 @@ const AlbumDetalle = () => {
     const [playlistQuery, setPlaylistQuery] = useState('');
     const [playlistSort, setPlaylistSort] = useState<PlaylistSort>('album');
 
-    const album = albumId ? getAlbumById(albumId) : undefined;
+    const isPreviewMode = new URLSearchParams(location.search).get('preview') === '1';
+    const previewAlbum = useMemo(() => {
+        if (!albumId || !isPreviewMode) return null;
+        return readAlbumPreview(albumId);
+    }, [albumId, isPreviewMode]);
+    const album = previewAlbum || (albumId ? getAlbumById(albumId) : undefined);
     const trackPositions = useMemo(() => {
         if (!album) return new Map<string, number>();
         return new Map(album.tracks.map((track, index) => [track.id, index + 1]));
@@ -133,7 +140,7 @@ const AlbumDetalle = () => {
         setPlaylistSort('album');
     }, [album?.id, isMobileLayout]);
 
-    if (isLoading) {
+    if (isLoading && !previewAlbum) {
         return (
             <div className="album-detail-page container">
                 <div className="loading-state">

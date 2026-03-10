@@ -105,14 +105,14 @@ const AlbumCard = ({ album, badges = [], isFavorite = false, onAddToQueue, onTog
         navigate(`/musica/album/${album.id}`);
     };
 
-    const startPreview = async () => {
+    const startPreview = async (options: { immediate?: boolean } = {}) => {
         if (album.tracks.length === 0) return;
         if (dataSaverEnabled) return;
+        if (previewRef.current || hoverTimeoutRef.current) return;
 
-        // Small delay before starting preview
         hoverTimeoutRef.current = window.setTimeout(async () => {
             const track = album.tracks[0];
-            const audioUrl = await db.getAudioFileUrl(track.id);
+            const audioUrl = db.getImmediateAudioUrl(track.id, track.audioFile) || (await db.getAudioFileUrl(track.id));
 
             if (!audioUrl) return;
             const previewFormats = inferPreviewFormats(audioUrl);
@@ -120,6 +120,7 @@ const AlbumCard = ({ album, badges = [], isFavorite = false, onAddToQueue, onTog
             previewRef.current = new Howl({
                 src: [audioUrl],
                 ...(previewFormats ? { format: previewFormats } : {}),
+                html5: true,
                 volume: 0.4,
                 onplay: () => {
                     setIsPreviewing(true);
@@ -140,13 +141,16 @@ const AlbumCard = ({ album, badges = [], isFavorite = false, onAddToQueue, onTog
                 onend: () => {
                     stopPreview();
                 },
+                onplayerror: () => {
+                    stopPreview();
+                },
                 onloaderror: () => {
                     stopPreview();
                 },
             });
 
             previewRef.current.play();
-        }, 500); // 500ms delay before preview starts
+        }, options.immediate ? 0 : 180);
     };
 
     const stopPreview = () => {
@@ -204,12 +208,24 @@ const AlbumCard = ({ album, badges = [], isFavorite = false, onAddToQueue, onTog
         setMenuOpen(false);
     };
 
+    const handlePreviewAlbum = (event: React.MouseEvent) => {
+        event.stopPropagation();
+        if (isPreviewing) {
+            stopPreview();
+        } else {
+            void startPreview({ immediate: true });
+        }
+        setMenuOpen(false);
+    };
+
     return (
         <motion.div
             className={`album-card glass ${isPreviewing ? 'previewing' : ''}`}
             whileHover={{ scale: 1.05, y: -5 }}
             transition={{ duration: 0.2 }}
-            onMouseEnter={startPreview}
+            onMouseEnter={() => {
+                void startPreview();
+            }}
             onMouseLeave={stopPreview}
             onClick={handleOpenAlbum}
         >
@@ -291,6 +307,9 @@ const AlbumCard = ({ album, badges = [], isFavorite = false, onAddToQueue, onTog
                             >
                                 <button type="button" onClick={handlePlayAlbum}>
                                     <FaPlay /> Reproducir
+                                </button>
+                                <button type="button" onClick={handlePreviewAlbum}>
+                                    <FaVolumeUp /> Vista previa
                                 </button>
                                 <button type="button" onClick={handleAddAlbumToQueue}>
                                     <FaPlus /> Anadir cola

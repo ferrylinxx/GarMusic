@@ -95,6 +95,18 @@ export interface ReleasePreregistrationResult {
     count: number;
 }
 
+interface AudioInfoResponse {
+    exists: boolean;
+    url: string | null;
+    updatedAt?: number | null;
+    expiresAt?: number | null;
+}
+
+interface CachedAudioUrl {
+    url: string;
+    expiresAt: number;
+}
+
 const rawApiBase = ((import.meta as ImportMeta & { env?: Record<string, string | undefined> }).env?.VITE_API_BASE_URL || '').trim();
 const normalizedApiBase = rawApiBase.endsWith('/') ? rawApiBase.slice(0, -1) : rawApiBase;
 const isLoopbackApiBase = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(normalizedApiBase);
@@ -269,6 +281,8 @@ class ApiError extends Error {
 }
 
 class DatabaseService {
+    private audioUrlCache = new Map<string, CachedAudioUrl>();
+
     private buildUrl(path: string): string {
         return `${API_BASE}${path}`;
     }
@@ -278,6 +292,39 @@ class DatabaseService {
             return url;
         }
         return this.buildUrl(url);
+    }
+
+    getTrackStreamUrl(trackId: string): string {
+        return this.toAbsoluteUrl(`/api/tracks/${encodeURIComponent(trackId)}/audio`);
+    }
+
+    getImmediateAudioUrl(trackId: string, audioFile?: string | null): string | null {
+        const normalized = String(audioFile || '').trim();
+        if (!normalized) return null;
+        if (/^https?:\/\//i.test(normalized)) return normalized;
+        if (normalized.startsWith('db:')) return this.getTrackStreamUrl(trackId);
+        if (normalized.startsWith('/')) return this.toAbsoluteUrl(normalized);
+        return this.toAbsoluteUrl(`/${normalized}`);
+    }
+
+    private getCachedAudioUrl(trackId: string): string | null {
+        const cached = this.audioUrlCache.get(trackId);
+        if (!cached) return null;
+        if (cached.expiresAt <= Date.now() + 60_000) {
+            this.audioUrlCache.delete(trackId);
+            return null;
+        }
+        return cached.url;
+    }
+
+    private setCachedAudioUrl(trackId: string, url: string, expiresAt?: number | null): void {
+        const normalizedExpiry = Number(expiresAt || 0);
+        const fallbackExpiry = Date.now() + 15 * 60_000;
+
+        this.audioUrlCache.set(trackId, {
+            url,
+            expiresAt: Number.isFinite(normalizedExpiry) && normalizedExpiry > Date.now() ? normalizedExpiry : fallbackExpiry,
+        });
     }
 
     private async request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -387,6 +434,7 @@ class DatabaseService {
 
     // ============ AUDIO FILES ============
     async saveAudioFile(trackId: string, file: File): Promise<string> {
+        this.audioUrlCache.delete(trackId);
         const mimeType = (file.type || '').toLowerCase();
         const fallbackExtension =
             mimeType === 'audio/mp4' || mimeType === 'audio/x-m4a' || mimeType === 'video/mp4'
@@ -427,21 +475,24 @@ class DatabaseService {
 
     async getAudioFileUrl(trackId: string): Promise<string | null> {
         try {
-            const info = await this.request<{ exists: boolean; url: string | null; updatedAt?: number | null }>(
+            const cached = this.getCachedAudioUrl(trackId);
+            if (cached) {
+                return cached;
+            }
+
+            const info = await this.request<AudioInfoResponse>(
                 `/api/tracks/${encodeURIComponent(trackId)}/audio-info`
             );
             if (!info?.exists || !info.url) {
+                this.audioUrlCache.delete(trackId);
                 return null;
             }
             const absoluteUrl = this.toAbsoluteUrl(info.url);
-            const updatedAt = Number(info.updatedAt || 0);
-            if (!Number.isFinite(updatedAt) || updatedAt <= 0) {
-                return absoluteUrl;
-            }
-            const separator = absoluteUrl.includes('?') ? '&' : '?';
-            return `${absoluteUrl}${separator}v=${updatedAt}`;
+            this.setCachedAudioUrl(trackId, absoluteUrl, info.expiresAt);
+            return absoluteUrl;
         } catch (error) {
             if (error instanceof ApiError && error.status === 404) {
+                this.audioUrlCache.delete(trackId);
                 return null;
             }
             throw error;
@@ -449,6 +500,7 @@ class DatabaseService {
     }
 
     async deleteAudioFile(trackId: string): Promise<void> {
+        this.audioUrlCache.delete(trackId);
         await this.request(`/api/tracks/${encodeURIComponent(trackId)}/audio`, {
             method: 'DELETE',
         });

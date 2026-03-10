@@ -625,14 +625,13 @@ export const PlayerProvider = ({ children }: PlayerProviderProps) => {
         };
 
         const rawAudioFile = String(track.audioFile || '').trim();
-        if (rawAudioFile && !rawAudioFile.startsWith('db:')) {
-            addCandidate(rawAudioFile);
-        }
+        addCandidate(db.getImmediateAudioUrl(track.id, rawAudioFile) || undefined);
 
         const shouldQueryDb =
-            !rawAudioFile ||
-            rawAudioFile.startsWith('db:') ||
-            (!rawAudioFile.startsWith('/') && !/^https?:\/\//i.test(rawAudioFile));
+            uniqueCandidates.size === 0 &&
+            (!rawAudioFile ||
+                rawAudioFile.startsWith('db:') ||
+                (!rawAudioFile.startsWith('/') && !/^https?:\/\//i.test(rawAudioFile)));
 
         if (shouldQueryDb) {
             try {

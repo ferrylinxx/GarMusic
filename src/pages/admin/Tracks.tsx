@@ -110,7 +110,7 @@ const Tracks = () => {
             const audioPairs = await Promise.all(
                 allTracks.map(async (track) => {
                     try {
-                        const url = await db.getAudioFileUrl(track.id);
+                        const url = db.getImmediateAudioUrl(track.id, track.audioFile) || (await db.getAudioFileUrl(track.id));
                         return [track.id, url] as const;
                     } catch (error) {
                         console.error('Error loading audio URL for track:', track.id, error);
