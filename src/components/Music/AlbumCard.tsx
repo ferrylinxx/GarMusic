@@ -6,7 +6,6 @@ import { FaPlay, FaClock, FaVolumeUp, FaEllipsisH, FaPlus, FaHeart, FaRegHeart, 
 import { useNavigate } from 'react-router-dom';
 import db from '../../services/DatabaseService';
 import useDataSaver from '../../hooks/useDataSaver';
-import { primeMediaPlayback } from '../../utils/mediaUnlock';
 import './AlbumCard.css';
 
 interface AlbumCardProps {
@@ -109,8 +108,6 @@ const AlbumCard = ({ album, badges = [], isFavorite = false, onAddToQueue, onTog
             const audioUrl = db.getImmediateAudioUrl(track.id, track.audioFile) || (await db.getAudioFileUrl(track.id));
 
             if (!audioUrl) return;
-            const unlocked = await primeMediaPlayback();
-            if (!unlocked || !hoveredRef.current) return;
 
             const audio = new Audio(audioUrl);
             audio.preload = 'auto';
@@ -128,8 +125,27 @@ const AlbumCard = ({ album, badges = [], isFavorite = false, onAddToQueue, onTog
             previewRef.current = audio;
 
             try {
-                await audio.play();
-                if (!hoveredRef.current) {
+                let started = false;
+
+                try {
+                    await audio.play();
+                    started = true;
+                } catch {
+                    audio.muted = true;
+                    try {
+                        await audio.play();
+                        started = true;
+                        window.setTimeout(() => {
+                            if (previewRef.current !== audio) return;
+                            audio.muted = false;
+                            audio.volume = 0.4;
+                        }, 120);
+                    } catch {
+                        started = false;
+                    }
+                }
+
+                if (!started || !hoveredRef.current) {
                     stopPreview();
                     return;
                 }
