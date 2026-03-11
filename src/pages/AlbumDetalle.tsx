@@ -42,6 +42,7 @@ const AlbumDetalle = () => {
     const {
         playAlbum,
         playTrack,
+        prepareTrackPlayback,
         currentTrack,
         isPlaying,
         addToQueue,
@@ -359,6 +360,7 @@ const AlbumDetalle = () => {
                             >
                                 <button
                                     className="album-track-main"
+                                    onTouchStart={() => prepareTrackPlayback(track)}
                                     onClick={() => playTrack(track, album)}
                                 >
                                     <span className="album-track-index">

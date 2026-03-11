@@ -13,6 +13,7 @@ interface PlayerContextType extends PlayerState {
     recentTrackIds: string[];
     playbackError: string | null;
     playTrack: (track: Track, album?: Album) => void;
+    prepareTrackPlayback: (track: Track) => void;
     playAlbum: (album: Album) => void;
     pauseTrack: () => void;
     togglePlay: () => void;
@@ -56,11 +57,50 @@ const RECENT_TRACK_LIMIT = 30;
 const CROSSFADE_WINDOW_SECONDS = 0.65;
 const CROSSFADE_DURATION_MS = 520;
 
+type PlaybackProfile = 'desktop' | 'ios-safari' | 'android-chrome' | 'mobile-web';
+
 const isLikelyIOS = (): boolean => {
     if (typeof navigator === 'undefined') return false;
     const userAgent = navigator.userAgent || '';
     const platform = navigator.platform || '';
     return /iPad|iPhone|iPod/i.test(userAgent) || (platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+};
+
+const isLikelyMobilePlaybackDevice = (): boolean => {
+    if (typeof navigator === 'undefined') return false;
+
+    const userAgent = navigator.userAgent || '';
+    const isMobileUa = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+    const isCoarsePointer =
+        typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+            ? window.matchMedia('(pointer: coarse)').matches || window.matchMedia('(max-width: 900px)').matches
+            : false;
+
+    return isMobileUa || isCoarsePointer;
+};
+
+const detectPlaybackProfile = (): PlaybackProfile => {
+    if (typeof navigator === 'undefined') return 'desktop';
+
+    const userAgent = navigator.userAgent || '';
+    const isIOS = isLikelyIOS();
+    const isSafari =
+        /Safari/i.test(userAgent) &&
+        !/CriOS|Chrome|EdgiOS|FxiOS|OPiOS|DuckDuckGo|YaBrowser/i.test(userAgent);
+
+    if (isIOS && isSafari) {
+        return 'ios-safari';
+    }
+
+    if (/Android/i.test(userAgent) && /Chrome/i.test(userAgent) && !/EdgA|OPR|SamsungBrowser/i.test(userAgent)) {
+        return 'android-chrome';
+    }
+
+    if (isLikelyMobilePlaybackDevice()) {
+        return 'mobile-web';
+    }
+
+    return 'desktop';
 };
 
 const toAbsoluteAssetUrl = (value?: string): string => {
@@ -233,6 +273,7 @@ export const PlayerProvider = ({ children }: PlayerProviderProps) => {
         currentAlbum: null,
         queue: [],
         isPlaying: false,
+        isBuffering: false,
         volume: 0.7,
         currentTime: 0,
         duration: 0,
@@ -246,7 +287,9 @@ export const PlayerProvider = ({ children }: PlayerProviderProps) => {
     const [favoriteTrackIds, setFavoriteTrackIds] = useState<string[]>([]);
     const [recentTrackIds, setRecentTrackIds] = useState<string[]>([]);
     const [playbackError, setPlaybackError] = useState<string | null>(null);
-    const crossfadeEnabled = !isLikelyIOS();
+    const playbackProfile = useMemo(() => detectPlaybackProfile(), []);
+    const mobilePlaybackDevice = playbackProfile !== 'desktop';
+    const crossfadeEnabled = playbackProfile === 'desktop';
 
     const soundRef = useRef<Howl | null>(null);
     const animationFrameRef = useRef<number | undefined>(undefined);
@@ -642,7 +685,21 @@ export const PlayerProvider = ({ children }: PlayerProviderProps) => {
         };
 
         const rawAudioFile = String(track.audioFile || '').trim();
-        addCandidate(db.getImmediateAudioUrl(track.id, rawAudioFile) || undefined);
+        const shouldPrioritizeSignedUrl =
+            !rawAudioFile ||
+            rawAudioFile.startsWith('db:') ||
+            (!rawAudioFile.startsWith('/') && !/^https?:\/\//i.test(rawAudioFile));
+
+        if (shouldPrioritizeSignedUrl) {
+            try {
+                const preferredDbUrl = await db.prefetchAudioUrl(track.id, rawAudioFile);
+                addCandidate(preferredDbUrl || undefined);
+            } catch (error) {
+                console.error('Error resolving preferred DB audio URL:', error);
+            }
+        }
+
+        addCandidate(db.getPreferredAudioUrl(track.id, rawAudioFile) || undefined);
 
         const shouldQueryDb =
             uniqueCandidates.size === 0 &&
@@ -681,7 +738,7 @@ export const PlayerProvider = ({ children }: PlayerProviderProps) => {
         return Boolean(connection?.saveData);
     };
 
-    const prefetchTrackAudio = async (track: Track) => {
+    const prefetchTrackAudio = async (track: Track, strategy: 'next' | 'intent' = 'next') => {
         if (typeof window === 'undefined') return;
         if (shouldUseDataSaver()) return;
 
@@ -694,7 +751,12 @@ export const PlayerProvider = ({ children }: PlayerProviderProps) => {
         }
 
         const audio = prefetchAudioRef.current || new Audio();
-        audio.preload = 'auto';
+        const shouldUseAggressivePreload =
+            strategy === 'intent' ||
+            playbackProfile === 'android-chrome' ||
+            (!mobilePlaybackDevice && strategy === 'next');
+
+        audio.preload = shouldUseAggressivePreload ? 'auto' : 'metadata';
         audio.src = source;
         try {
             audio.load();
@@ -705,6 +767,13 @@ export const PlayerProvider = ({ children }: PlayerProviderProps) => {
         prefetchAudioRef.current = audio;
         prefetchedTrackIdRef.current = track.id;
         prefetchedSourceRef.current = source;
+    };
+
+    const prepareTrackPlayback = (track: Track) => {
+        if (playbackProfile === 'ios-safari') {
+            void primeMediaPlayback();
+        }
+        void prefetchTrackAudio(track, 'intent');
     };
 
     const applyCrossfade = (incoming: Howl, outgoing: Howl, targetVolume: number) => {
@@ -732,6 +801,21 @@ export const PlayerProvider = ({ children }: PlayerProviderProps) => {
 
     const playTrack = async (track: Track, album?: Album) => {
         const previousSound = soundRef.current;
+
+        if (playbackProfile === 'ios-safari') {
+            await primeMediaPlayback();
+        }
+
+        setState((prev) => ({
+            ...prev,
+            currentTrack: track,
+            currentAlbum: album || prev.currentAlbum,
+            isPlaying: false,
+            isBuffering: true,
+            currentTime: 0,
+            duration: 0,
+        }));
+
         let audioCandidates = await resolveTrackAudioCandidates(track);
 
         if (prefetchedTrackIdRef.current === track.id && prefetchedSourceRef.current) {
@@ -743,7 +827,13 @@ export const PlayerProvider = ({ children }: PlayerProviderProps) => {
 
         if (audioCandidates.length === 0) {
             setPlaybackError(`No hay audio disponible para "${track.title}".`);
-            setState((prev) => ({ ...prev, isPlaying: false }));
+            setState((prev) => ({
+                ...prev,
+                currentTrack: track,
+                currentAlbum: album || prev.currentAlbum,
+                isPlaying: false,
+                isBuffering: false,
+            }));
             return;
         }
 
@@ -751,6 +841,7 @@ export const PlayerProvider = ({ children }: PlayerProviderProps) => {
         const shouldCrossfade = Boolean(previousSound && crossfadeEnabled);
 
         if (!shouldCrossfade && previousSound) {
+            soundRef.current = null;
             try {
                 previousSound.stop();
                 previousSound.unload();
@@ -787,6 +878,7 @@ export const PlayerProvider = ({ children }: PlayerProviderProps) => {
                 currentTrack: track,
                 currentAlbum: album || prev.currentAlbum,
                 isPlaying: true,
+                isBuffering: false,
                 currentTime: 0,
                 duration: Number.isFinite(sound.duration()) ? sound.duration() : prev.duration,
             }));
@@ -804,6 +896,7 @@ export const PlayerProvider = ({ children }: PlayerProviderProps) => {
                 src: [source],
                 ...(sourceFormats ? { format: sourceFormats } : {}),
                 html5: true,
+                preload: true,
                 volume: shouldCrossfade ? 0 : targetVolume,
                 onload: () => {
                     if (soundRef.current !== sound) return;
@@ -824,6 +917,23 @@ export const PlayerProvider = ({ children }: PlayerProviderProps) => {
 
                     markPlaybackStarted(sound);
                 },
+                onpause: () => {
+                    if (soundRef.current !== sound) return;
+                    setState((prev) => ({
+                        ...prev,
+                        isPlaying: false,
+                        isBuffering: false,
+                    }));
+                },
+                onstop: () => {
+                    if (soundRef.current !== sound) return;
+                    setState((prev) => ({
+                        ...prev,
+                        isPlaying: false,
+                        isBuffering: false,
+                        currentTime: 0,
+                    }));
+                },
                 onend: () => {
                     if (soundRef.current !== sound) return;
                     nextTrack();
@@ -835,7 +945,7 @@ export const PlayerProvider = ({ children }: PlayerProviderProps) => {
                         const retriedPlayId = sound.play();
                         if (typeof retriedPlayId !== 'number') {
                             setPlaybackError(`No se pudo iniciar "${track.title}".`);
-                            setState((prev) => ({ ...prev, isPlaying: false }));
+                            setState((prev) => ({ ...prev, isPlaying: false, isBuffering: false }));
                         }
                     });
                 },
@@ -857,13 +967,13 @@ export const PlayerProvider = ({ children }: PlayerProviderProps) => {
                         const fallbackPlayId = fallbackSound.play();
                         if (typeof fallbackPlayId !== 'number') {
                             setPlaybackError(`No se pudo reproducir "${track.title}".`);
-                            setState((prev) => ({ ...prev, isPlaying: false }));
+                            setState((prev) => ({ ...prev, isPlaying: false, isBuffering: false }));
                         }
                         return;
                     }
 
                     setPlaybackError(`No se pudo cargar "${track.title}".`);
-                    setState((prev) => ({ ...prev, isPlaying: false }));
+                    setState((prev) => ({ ...prev, isPlaying: false, isBuffering: false }));
                 },
             });
 
@@ -878,7 +988,7 @@ export const PlayerProvider = ({ children }: PlayerProviderProps) => {
         const playId = sound.play();
         if (typeof playId !== 'number') {
             setPlaybackError(`No se pudo reproducir "${track.title}".`);
-            setState((prev) => ({ ...prev, isPlaying: false }));
+            setState((prev) => ({ ...prev, isPlaying: false, isBuffering: false }));
         }
     };
 
@@ -891,11 +1001,15 @@ export const PlayerProvider = ({ children }: PlayerProviderProps) => {
     const pauseTrack = () => {
         if (soundRef.current) {
             soundRef.current.pause();
-            setState((prev) => ({ ...prev, isPlaying: false }));
+            setState((prev) => ({ ...prev, isPlaying: false, isBuffering: false }));
         }
     };
 
     const togglePlay = () => {
+        if (stateRef.current.isBuffering) {
+            return;
+        }
+
         if (stateRef.current.isPlaying) {
             pauseTrack();
             return;
@@ -903,12 +1017,11 @@ export const PlayerProvider = ({ children }: PlayerProviderProps) => {
 
         if (soundRef.current) {
             clearPlaybackError();
+            setState((prev) => ({ ...prev, isBuffering: true }));
             const playId = soundRef.current.play();
-            if (typeof playId === 'number') {
-                setState((prev) => ({ ...prev, isPlaying: true }));
-            } else {
+            if (typeof playId !== 'number') {
                 setPlaybackError('No se pudo reanudar la reproduccion.');
-                setState((prev) => ({ ...prev, isPlaying: false }));
+                setState((prev) => ({ ...prev, isPlaying: false, isBuffering: false }));
             }
             return;
         }
@@ -1121,6 +1234,7 @@ export const PlayerProvider = ({ children }: PlayerProviderProps) => {
                 recentTrackIds,
                 playbackError,
                 playTrack,
+                prepareTrackPlayback,
                 playAlbum,
                 pauseTrack,
                 togglePlay,

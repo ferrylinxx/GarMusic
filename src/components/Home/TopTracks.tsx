@@ -17,7 +17,7 @@ const FETCH_TOP_TRACKS = 14;
 
 const TopTracks = () => {
     const { albums } = useDiscography();
-    const { playTrack } = usePlayer();
+    const { playTrack, prepareTrackPlayback } = usePlayer();
     const [topTracks, setTopTracks] = useState<TrackWithStats[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -131,6 +131,7 @@ const TopTracks = () => {
                         viewport={{ once: true }}
                         transition={{ duration: 0.35 }}
                         whileHover={{ scale: 1.01 }}
+                        onTouchStart={() => prepareTrackPlayback(featuredTrack)}
                         onClick={() => handlePlay(featuredTrack)}
                     >
                         <span className="top-track-feature-rank">#1</span>
@@ -162,6 +163,7 @@ const TopTracks = () => {
                             viewport={{ once: true }}
                             transition={{ duration: 0.3, delay: index * 0.08 }}
                             whileHover={{ x: 6 }}
+                            onTouchStart={() => prepareTrackPlayback(track)}
                             onClick={() => handlePlay(track)}
                         >
                             <span className={`top-track-compact-rank ${index < 2 ? 'top-three' : ''}`}>

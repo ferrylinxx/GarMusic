@@ -63,6 +63,7 @@ export interface PlayerState {
   currentAlbum: Album | null;
   queue: Track[];
   isPlaying: boolean;
+  isBuffering: boolean;
   volume: number;
   currentTime: number;
   duration: number;

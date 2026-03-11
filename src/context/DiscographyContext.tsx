@@ -127,8 +127,9 @@ export const DiscographyProvider = ({ children }: { children: ReactNode }) => {
         for (const album of albums) {
             const track = album.tracks.find((item) => item.id === trackId);
             if (track) {
-                const immediateUrl = db.getImmediateAudioUrl(track.id, track.audioFile);
-                if (immediateUrl) return immediateUrl;
+                const preferredUrl = db.getPreferredAudioUrl(track.id, track.audioFile);
+                if (preferredUrl) return preferredUrl;
+                return db.prefetchAudioUrl(track.id, track.audioFile);
             }
         }
 

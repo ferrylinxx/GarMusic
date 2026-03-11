@@ -11,7 +11,7 @@ interface TrackItemProps {
 }
 
 const TrackItem = ({ track, album, index }: TrackItemProps) => {
-    const { playTrack, currentTrack, isPlaying, addToQueue, togglePlay, toggleFavoriteTrack, isFavoriteTrack } = usePlayer();
+    const { playTrack, prepareTrackPlayback, currentTrack, isPlaying, addToQueue, togglePlay, toggleFavoriteTrack, isFavoriteTrack } = usePlayer();
 
     const isCurrentTrack = currentTrack?.id === track.id;
     const isFavorite = isFavoriteTrack(track.id);
@@ -51,6 +51,7 @@ const TrackItem = ({ track, album, index }: TrackItemProps) => {
         <div
             className={`track-item ${isCurrentTrack ? 'active' : ''} ${isCurrentTrack && !isPlaying ? 'paused' : ''}`}
             onClick={handlePlay}
+            onTouchStart={() => prepareTrackPlayback(track)}
             onKeyDown={handleKeyDown}
             role="button"
             tabIndex={0}

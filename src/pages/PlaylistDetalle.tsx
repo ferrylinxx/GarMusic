@@ -23,7 +23,7 @@ const formatDuration = (seconds: number): string => {
 const PlaylistDetalle = () => {
     const { playlistId } = useParams<{ playlistId: string }>();
     const { albums } = useDiscography();
-    const { playTrack, addToQueue, isFavoriteTrack, toggleFavoriteTrack } = usePlayer();
+    const { playTrack, prepareTrackPlayback, addToQueue, isFavoriteTrack, toggleFavoriteTrack } = usePlayer();
     const [playlist, setPlaylist] = useState<Playlist | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [shareMessage, setShareMessage] = useState('');
@@ -160,7 +160,12 @@ const PlaylistDetalle = () => {
                         const isFav = isFavoriteTrack(track.id);
                         return (
                             <article key={`${track.id}-${index}`} className="playlist-track-row">
-                                <button type="button" className="playlist-track-main" onClick={() => playTrack(track, album)}>
+                                <button
+                                    type="button"
+                                    className="playlist-track-main"
+                                    onTouchStart={() => prepareTrackPlayback(track)}
+                                    onClick={() => playTrack(track, album)}
+                                >
                                     <span className="playlist-track-index">{index + 1}</span>
                                     <span className="playlist-track-copy">
                                         <strong>{track.title}</strong>
@@ -195,4 +200,3 @@ const PlaylistDetalle = () => {
 };
 
 export default PlaylistDetalle;
-

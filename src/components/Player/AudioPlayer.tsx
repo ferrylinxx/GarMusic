@@ -105,6 +105,7 @@ const AudioPlayer = () => {
         currentTrack,
         currentAlbum,
         isPlaying,
+        isBuffering,
         currentTime,
         duration,
         queue,
@@ -176,6 +177,16 @@ const AudioPlayer = () => {
     const currentIsFavorite = isFavoriteTrack(currentTrack.id);
     const remainingTime = Math.max(0, safeDuration - currentTime);
     const panelView: PanelView = showLyrics ? 'lyrics' : showCredits ? 'credits' : 'queue';
+    const playerArtwork = currentTrack.coverArt || currentAlbum?.coverArt || '/images/default-cover.jpg';
+    const playbackStatusLabel = playbackError
+        ? 'Error de reproduccion'
+        : isBuffering
+        ? 'Conectando...'
+        : isPlaying
+        ? 'Reproduciendo'
+        : 'En pausa';
+    const playToggleLabel = isBuffering ? 'Cargando audio' : isPlaying ? 'Pausar' : 'Reproducir';
+    const playButtonContent = isBuffering ? <span className="control-loader" aria-hidden /> : isPlaying ? <FaPause /> : <FaPlay />;
 
     const showQueuePanel = () => {
         if (showLyrics) toggleLyrics();
@@ -289,14 +300,35 @@ const AudioPlayer = () => {
                                 transition={{ duration: 0.2 }}
                             >
                                 {isMobilePlayer && (
-                                    <div
-                                        className="panel-sheet-handle"
-                                        onTouchStart={handlePanelHandleTouchStart}
-                                        onTouchEnd={handlePanelHandleTouchEnd}
-                                        aria-hidden
-                                    >
-                                        <span />
-                                    </div>
+                                    <>
+                                        <div
+                                            className="panel-sheet-handle"
+                                            onTouchStart={handlePanelHandleTouchStart}
+                                            onTouchEnd={handlePanelHandleTouchEnd}
+                                            aria-hidden
+                                        >
+                                            <span />
+                                        </div>
+                                        <div className="mobile-panel-now-playing">
+                                            <img src={playerArtwork} alt={currentTrack.title} className="mobile-panel-cover" />
+                                            <div className="mobile-panel-copy">
+                                                <span className={`mobile-player-status ${isBuffering ? 'buffering' : playbackError ? 'error' : isPlaying ? 'playing' : ''}`}>
+                                                    {playbackStatusLabel}
+                                                </span>
+                                                <strong>{currentTrack.title}</strong>
+                                                <small>{currentAlbum?.title || 'Single'}</small>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                className="control-btn control-btn-play mobile-panel-play-btn"
+                                                onClick={togglePlay}
+                                                aria-label={playToggleLabel}
+                                                disabled={isBuffering}
+                                            >
+                                                {playButtonContent}
+                                            </button>
+                                        </div>
+                                    </>
                                 )}
                                 <header className="panel-header">
                                     <div className="panel-tabs" role="tablist" aria-label="Vistas del reproductor">
@@ -413,129 +445,249 @@ const AudioPlayer = () => {
                 </AnimatePresence>
 
                 <motion.div
-                    className="audio-player glass-strong"
+                    className={`audio-player glass-strong ${isMobilePlayer ? 'is-mobile-player' : ''}`}
                     onTouchStart={handleBarTouchStart}
                     onTouchEnd={handleBarTouchEnd}
                 >
-                    <div className="player-track-info">
-                        {currentAlbum && (
-                            <img src={currentAlbum.coverArt} alt={currentAlbum.title} className="player-cover" />
-                        )}
-                        <div className="player-text">
-                            <div className="player-track-title">{currentTrack.title}</div>
-                            <div className="player-track-artist">{currentAlbum?.title || 'Single'}</div>
-                        </div>
-                        <button
-                            type="button"
-                            className={`player-favorite-btn ${currentIsFavorite ? 'active' : ''}`}
-                            onClick={() => toggleFavoriteTrack(currentTrack.id)}
-                            aria-label={currentIsFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
-                        >
-                            {currentIsFavorite ? <FaHeart /> : <FaRegHeart />}
-                        </button>
-                    </div>
-
-                    <div className="player-center">
-                        <div className="player-controls">
-                            <button
-                                type="button"
-                                className={`control-btn ${shuffle ? 'active' : ''}`}
-                                onClick={toggleShuffle}
-                                aria-label="Alternar aleatorio"
-                            >
-                                <FaRandom />
-                            </button>
-                            <button type="button" className="control-btn" onClick={previousTrack} aria-label="Cancion anterior">
-                                <FaStepBackward />
-                            </button>
-                            <button
-                                type="button"
-                                className="control-btn control-btn-play"
-                                onClick={togglePlay}
-                                aria-label={isPlaying ? 'Pausar' : 'Reproducir'}
-                            >
-                                {isPlaying ? <FaPause /> : <FaPlay />}
-                            </button>
-                            <button type="button" className="control-btn" onClick={nextTrack} aria-label="Siguiente cancion">
-                                <FaStepForward />
-                            </button>
-                            <button
-                                type="button"
-                                className={`control-btn ${repeat !== 'off' ? 'active' : ''}`}
-                                onClick={toggleRepeat}
-                                aria-label={`Alternar repeticion (${repeat})`}
-                                title={repeat === 'off' ? 'Repeticion desactivada' : repeat === 'all' ? 'Repetir todo' : 'Repetir una'}
-                            >
-                                <FaRedoAlt />
-                                {repeat === 'one' && <span className="control-badge">1</span>}
-                            </button>
-                        </div>
-
-                        <div className="player-progress">
-                            <span className="time-display">{formatTime(currentTime)}</span>
-                            <input
-                                type="range"
-                                min="0"
-                                max={safeDuration || 1}
-                                value={Math.min(currentTime, safeDuration || 1)}
-                                onChange={(event) => seekTo(parseFloat(event.target.value))}
-                                className="progress-bar"
-                                style={{ '--progress': `${progress}%` } as CSSProperties}
-                                aria-label="Progreso de reproduccion"
-                            />
-                            <span className="time-display">-{formatTime(remainingTime)}</span>
-                        </div>
-
-                        {playbackError && (
-                            <div className="player-error-banner" role="status" aria-live="polite">
-                                <span>{playbackError}</span>
-                                <div className="player-error-actions">
-                                    <button type="button" className="player-error-btn" onClick={retryCurrentTrack}>
-                                        Reintentar
+                    {isMobilePlayer ? (
+                        <>
+                            <div className="mobile-player-top">
+                                <button
+                                    type="button"
+                                    className="mobile-track-button"
+                                    onClick={toggleExpanded}
+                                    aria-label="Abrir panel del reproductor"
+                                >
+                                    <img src={playerArtwork} alt={currentTrack.title} className="player-cover" />
+                                    <div className="player-text">
+                                        <span className={`mobile-player-status ${isBuffering ? 'buffering' : playbackError ? 'error' : isPlaying ? 'playing' : ''}`}>
+                                            {playbackStatusLabel}
+                                        </span>
+                                        <div className="player-track-title">{currentTrack.title}</div>
+                                        <div className="player-track-artist">{currentAlbum?.title || 'Single'}</div>
+                                    </div>
+                                </button>
+                                <div className="mobile-player-header-actions">
+                                    <button
+                                        type="button"
+                                        className={`player-favorite-btn ${currentIsFavorite ? 'active' : ''}`}
+                                        onClick={() => toggleFavoriteTrack(currentTrack.id)}
+                                        aria-label={currentIsFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+                                    >
+                                        {currentIsFavorite ? <FaHeart /> : <FaRegHeart />}
                                     </button>
-                                    <button type="button" className="player-error-btn secondary" onClick={clearPlaybackError}>
-                                        Cerrar
+                                    <button
+                                        type="button"
+                                        className="control-btn player-expand-btn"
+                                        onClick={toggleExpanded}
+                                        aria-label={isExpanded ? 'Cerrar panel del reproductor' : 'Abrir panel del reproductor'}
+                                    >
+                                        {isExpanded ? <FaCompress /> : <FaExpand />}
                                     </button>
                                 </div>
                             </div>
-                        )}
-                    </div>
 
-                    <div className="player-right">
-                        <button
-                            type="button"
-                            className="control-btn queue-toggle"
-                            onClick={showQueuePanel}
-                            aria-label="Abrir cola"
-                        >
-                            <FaListUl />
-                            <span>{queue.length}</span>
-                        </button>
+                            <div className="mobile-progress-block">
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max={safeDuration || 1}
+                                    value={Math.min(currentTime, safeDuration || 1)}
+                                    onChange={(event) => seekTo(parseFloat(event.target.value))}
+                                    className="progress-bar mobile-progress-bar"
+                                    style={{ '--progress': `${progress}%` } as CSSProperties}
+                                    aria-label="Progreso de reproduccion"
+                                />
+                                <div className="mobile-time-row">
+                                    <span className="time-display">{formatTime(currentTime)}</span>
+                                    <span className="time-display">-{formatTime(remainingTime)}</span>
+                                </div>
+                            </div>
 
-                        <div className="volume-control">
-                            <span className="volume-icon">{volumePercent <= 2 ? <FaVolumeMute /> : <FaVolumeUp />}</span>
-                            <input
-                                type="range"
-                                min="0"
-                                max="1"
-                                step="0.01"
-                                value={volume}
-                                onChange={(event) => setVolume(parseFloat(event.target.value))}
-                                className="volume-slider"
-                                style={{ '--progress': `${volumePercent}%` } as CSSProperties}
-                                aria-label="Volumen"
-                            />
-                        </div>
+                            {playbackError && (
+                                <div className="player-error-banner" role="status" aria-live="polite">
+                                    <span>{playbackError}</span>
+                                    <div className="player-error-actions">
+                                        <button type="button" className="player-error-btn" onClick={retryCurrentTrack}>
+                                            Reintentar
+                                        </button>
+                                        <button type="button" className="player-error-btn secondary" onClick={clearPlaybackError}>
+                                            Cerrar
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
 
-                        <button
-                            type="button"
-                            className="control-btn player-expand-btn"
-                            onClick={toggleExpanded}
-                            aria-label={isExpanded ? 'Cerrar panel del reproductor' : 'Abrir panel del reproductor'}
-                        >
-                            {isExpanded ? <FaCompress /> : <FaExpand />}
-                        </button>
-                    </div>
+                            <div className="player-controls mobile-primary-controls">
+                                <button
+                                    type="button"
+                                    className={`control-btn ${shuffle ? 'active' : ''}`}
+                                    onClick={toggleShuffle}
+                                    aria-label="Alternar aleatorio"
+                                >
+                                    <FaRandom />
+                                </button>
+                                <button type="button" className="control-btn" onClick={previousTrack} aria-label="Cancion anterior">
+                                    <FaStepBackward />
+                                </button>
+                                <button
+                                    type="button"
+                                    className="control-btn control-btn-play"
+                                    onClick={togglePlay}
+                                    aria-label={playToggleLabel}
+                                    disabled={isBuffering}
+                                >
+                                    {playButtonContent}
+                                </button>
+                                <button type="button" className="control-btn" onClick={nextTrack} aria-label="Siguiente cancion">
+                                    <FaStepForward />
+                                </button>
+                                <button
+                                    type="button"
+                                    className={`control-btn ${repeat !== 'off' ? 'active' : ''}`}
+                                    onClick={toggleRepeat}
+                                    aria-label={`Alternar repeticion (${repeat})`}
+                                    title={repeat === 'off' ? 'Repeticion desactivada' : repeat === 'all' ? 'Repetir todo' : 'Repetir una'}
+                                >
+                                    <FaRedoAlt />
+                                    {repeat === 'one' && <span className="control-badge">1</span>}
+                                </button>
+                            </div>
+
+                            <div className="mobile-secondary-controls">
+                                <button type="button" className="mobile-chip-btn" onClick={showQueuePanel}>
+                                    <FaListUl /> Cola <strong>{queue.length}</strong>
+                                </button>
+                                <button type="button" className="mobile-chip-btn" onClick={showLyricsPanel}>
+                                    <FaAlignLeft /> Letra
+                                </button>
+                                <button type="button" className="mobile-chip-btn" onClick={showCreditsPanel}>
+                                    <FaUserEdit /> Creditos
+                                </button>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <div className="player-track-info">
+                                <img src={playerArtwork} alt={currentTrack.title} className="player-cover" />
+                                <div className="player-text">
+                                    <div className="player-track-title">{currentTrack.title}</div>
+                                    <div className="player-track-artist">{currentAlbum?.title || 'Single'}</div>
+                                </div>
+                                <button
+                                    type="button"
+                                    className={`player-favorite-btn ${currentIsFavorite ? 'active' : ''}`}
+                                    onClick={() => toggleFavoriteTrack(currentTrack.id)}
+                                    aria-label={currentIsFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+                                >
+                                    {currentIsFavorite ? <FaHeart /> : <FaRegHeart />}
+                                </button>
+                            </div>
+
+                            <div className="player-center">
+                                <div className="player-controls">
+                                    <button
+                                        type="button"
+                                        className={`control-btn ${shuffle ? 'active' : ''}`}
+                                        onClick={toggleShuffle}
+                                        aria-label="Alternar aleatorio"
+                                    >
+                                        <FaRandom />
+                                    </button>
+                                    <button type="button" className="control-btn" onClick={previousTrack} aria-label="Cancion anterior">
+                                        <FaStepBackward />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="control-btn control-btn-play"
+                                        onClick={togglePlay}
+                                        aria-label={playToggleLabel}
+                                        disabled={isBuffering}
+                                    >
+                                        {playButtonContent}
+                                    </button>
+                                    <button type="button" className="control-btn" onClick={nextTrack} aria-label="Siguiente cancion">
+                                        <FaStepForward />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={`control-btn ${repeat !== 'off' ? 'active' : ''}`}
+                                        onClick={toggleRepeat}
+                                        aria-label={`Alternar repeticion (${repeat})`}
+                                        title={repeat === 'off' ? 'Repeticion desactivada' : repeat === 'all' ? 'Repetir todo' : 'Repetir una'}
+                                    >
+                                        <FaRedoAlt />
+                                        {repeat === 'one' && <span className="control-badge">1</span>}
+                                    </button>
+                                </div>
+
+                                <div className="player-progress">
+                                    <span className="time-display">{formatTime(currentTime)}</span>
+                                    <input
+                                        type="range"
+                                        min="0"
+                                        max={safeDuration || 1}
+                                        value={Math.min(currentTime, safeDuration || 1)}
+                                        onChange={(event) => seekTo(parseFloat(event.target.value))}
+                                        className="progress-bar"
+                                        style={{ '--progress': `${progress}%` } as CSSProperties}
+                                        aria-label="Progreso de reproduccion"
+                                    />
+                                    <span className="time-display">-{formatTime(remainingTime)}</span>
+                                </div>
+
+                                {playbackError && (
+                                    <div className="player-error-banner" role="status" aria-live="polite">
+                                        <span>{playbackError}</span>
+                                        <div className="player-error-actions">
+                                            <button type="button" className="player-error-btn" onClick={retryCurrentTrack}>
+                                                Reintentar
+                                            </button>
+                                            <button type="button" className="player-error-btn secondary" onClick={clearPlaybackError}>
+                                                Cerrar
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="player-right">
+                                <button
+                                    type="button"
+                                    className="control-btn queue-toggle"
+                                    onClick={showQueuePanel}
+                                    aria-label="Abrir cola"
+                                >
+                                    <FaListUl />
+                                    <span>{queue.length}</span>
+                                </button>
+
+                                <div className="volume-control">
+                                    <span className="volume-icon">{volumePercent <= 2 ? <FaVolumeMute /> : <FaVolumeUp />}</span>
+                                    <input
+                                        type="range"
+                                        min="0"
+                                        max="1"
+                                        step="0.01"
+                                        value={volume}
+                                        onChange={(event) => setVolume(parseFloat(event.target.value))}
+                                        className="volume-slider"
+                                        style={{ '--progress': `${volumePercent}%` } as CSSProperties}
+                                        aria-label="Volumen"
+                                    />
+                                </div>
+
+                                <button
+                                    type="button"
+                                    className="control-btn player-expand-btn"
+                                    onClick={toggleExpanded}
+                                    aria-label={isExpanded ? 'Cerrar panel del reproductor' : 'Abrir panel del reproductor'}
+                                >
+                                    {isExpanded ? <FaCompress /> : <FaExpand />}
+                                </button>
+                            </div>
+                        </>
+                    )}
                 </motion.div>
             </motion.div>
         </AnimatePresence>
